@@ -291,6 +291,93 @@ Pbind(
 	);
 )
 
+////////////////////////////////////////////////////////////////////////////////
+// (5) PATTERN LOOP
+////////////////////////////////////////////////////////////////////////////////
+
+// 10.asString.padLeft(2, "0")
+
+(
+var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
+var window, envView;
+
+centerBase = 3.0;
+centerRange = 1.0;
+speed = 0.1;
+stepSize = 0.1;
+lowerBound = 0.5;
+upperBound = 5.0;
+
+~numVoices = 10;
+~voices = Dictionary.new;
+
+Window.closeAll;
+
+(0..~numVoices).do { |i|
+	var voiceName = ("voice" ++ (i + 1).asString.padLeft(2, "0")).asSymbol;
+	window = Window(voiceName, Rect(100, 100, 400, 200)).front;
+	envView = EnvelopeView(window, Rect(20, 20, 360, 160));
+	envView.drawLines = true;
+	envView.setEnv(Env.perc(0.01, 0.1));
+
+
+	/*    ~voices[voiceName] = Pdef(voiceName, Pbind(
+	\instrument, \yourSynth,   // Replace \yourSynth with your actual SynthDef name
+	\amp, Pkey(\amp),          // Volume will be controlled by an external key
+	\pan, Pkey(\pan),          // Pan will be controlled by an external key
+	\dur, 1                   // Duration of each event (beats)
+	));*/
+
+	~voices[voiceName] = Pdef(voiceName, Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, i,
+		\dur, i+1,
+		\atk, Pseries(0, 1).collect { |i|
+			var t = i / (rrand(24, 96)) * 2pi;  // one full wave cycle over 24-96 events
+			var min = 0.01;
+			var max = 0.9;
+			var a = sin(t) * 0.5 + 0.5;  // [0, 1]
+			a = a * (max - min) + min;  // [min to max]
+			a;
+		},
+		\rel, Pfunc { |e|
+			e[\dur] - e[\atk]
+		},
+		\do, Pfunc { |e|
+			{
+				var attack = e[\atk];
+				var release = e[\rel];
+				var amp = e[\amp];
+				var env = Env.new([0, 1, 0], [attack, release], 'lin');
+				envView.setEnv(env);
+
+				("(%) a: %, r: %, d: %, [%]"
+					.format(
+						e[\amp].round(0.001),
+						e[\atk].round(0.001),
+						e[\rel].round(0.001),
+						e[\dur].round(0.001),
+						e[\dur] - (e[\atk] + e[\rel])
+					)
+				).postln;
+			}.defer
+		},
+		\amp, Pseries(0, 1).collect { |i|
+			var t = i / rrand(24, 96) * 2pi;  // one full wave cycle over 48 events
+			var min = 0.2;
+			var max = 0.6;
+			var a = sin(t) * 0.5 + 0.5;  // [0, 1]
+			a = a * (max - min) + min;  // [min to max]
+			a;
+		},
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+	));
+	// ~voices[voiceName].play;  // Start the pattern
+};
+
+PdefAllGui(Pdef.all.size);
+)
+
 
 (
 ~clock = TempoClock.new(2);  // 2 beats per second = 120 bpm
