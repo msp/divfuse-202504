@@ -73,7 +73,7 @@ SynthDef(\panningSamplePlayer, {
         numChannels: 1,
         bufnum: bufnum,
         rate: rate * BufRateScale.kr(bufnum),
-        startPos: startPos,
+		startPos: startPos,
         doneAction: 0
     );
 
@@ -344,3 +344,23 @@ Routine({
 
 ~voices
 
+(
+{
+    PanAz.ar(
+        numChans: 6,
+		in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
+		// in: ClipNoise.ar(0.1),
+		// in: Saw.ar(rrand(50, 120), rrand(0.1, 0.3)),
+		// in: Saw.ar(rrand(250, 420), rrand(0.1, 0.3)),
+		// in: RLPF.ar(Saw.ar([100,250],0.1), XLine.kr(8000,400,5), 0.05),
+		// in: Klang.ar(`[ Array.rand(12, 600.0, 1000.0), nil, nil ], 1, 0) * 0.05,
+		// pos: LFSaw.kr(MouseX.kr(0.2, 8, 'exponential')).poll,
+		pos: LFSaw.kr(rrand(0.2, 2)),
+        level: 0.5,
+		width: rrand(0.1, 4),
+		// width: 4,
+        orientation: 0.5
+    );
+// }.scope.trace
+}.play.trace
+)
