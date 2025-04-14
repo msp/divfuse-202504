@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// (1) SETUP - ensure the path to sample folder is correct
+// (1a) BOOT
 ////////////////////////////////////////////////////////////////////////////////
 
 (
@@ -12,6 +12,10 @@ s.options.numOutputBusChannels = 8;     // or however many outputs you want
 s.options.numInputBusChannels = 0;      // if you don't need inputs
 s.reboot; // or s.boot if you're not changing the device
 )
+
+////////////////////////////////////////////////////////////////////////////////
+// (1b) SETUP - ensure the path to sample folder is correct
+////////////////////////////////////////////////////////////////////////////////
 
 
 (
@@ -51,44 +55,6 @@ PathName(~sampleDir).files.do { |file, i|
 ////////////////////////////////////////////////////////////////////////////////
 // (2) SAMPLER
 ////////////////////////////////////////////////////////////////////////////////
-/*(
-SynthDef(\cleanSamplePlayer, { |out=0, bufnum, amp=1, rate=1, startPos=0, pan=0,
-    gate=1, atk=0.01, rel=0.3|
-
-    var sig, env;
-    env = EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction: 2);
-
-    sig = PlayBuf.ar(1, bufnum, rate * BufRateScale.kr(bufnum), startPos: startPos);
-    sig = sig * env * amp;
-    sig = Pan2.ar(sig, pan);
-    Out.ar(out, sig);
-}).add;
-)*/
-
-/*(
-SynthDef(\panningSamplePlayer, { |out=0, bufnum, amp=1, rate=1, startPos=0,
-    atk=0.01, rel=0.3, gate=1, panDur=1|
-
-    var sig, env, pan;
-
-    // Pan over the specified duration (from the event)
-	pan = Line.kr(-1, 1, panDur);
-
-    // Envelope
-    env = EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction: 2);
-
-    // Sample playback
-	// sig = PlayBuf.ar(1, bufnum, rate * BufRateScale.kr(bufnum), startPos: startPos);
-	// sig = sig * env * amp;
-
-	// Sine wave tone instead of sample playback
-	// sig = SinOsc.ar(440) * env * amp;
-    sig = SinOsc.ar(440) * amp;
-    sig = Pan2.ar(sig, pan);
-    Out.ar(out, sig);
-}).add;
-)*/
-
 (
 SynthDef(\panningSamplePlayer, {
     |out=0, bufnum=0, amp=1, rate=1, startPos=0, panDur=5,
@@ -118,6 +84,10 @@ SynthDef(\panningSamplePlayer, {
 }).add;
 )
 
+////////////////////////////////////////////////////////////////////////////////
+// (3) TEST / TRIGGER
+////////////////////////////////////////////////////////////////////////////////
+
 (
 Pbind(
     \instrument, \panningSamplePlayer,
@@ -129,56 +99,12 @@ Pbind(
     \amp, 0.2,
 	\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
 ).play;
-
-// Pbind(
-// 	\instrument, \panningSamplePlayer,
-// 	\bufnum, ~samples[0].bufnum,
-// 	\dur, 3,
-// 	\panDur, 3,
-// 	\atk, 0.1,
-// 	\rel, 0.1,
-// 	\amp, 0.8,
-// 	\out, ~out2,
-// ).play;
-
-// { PinkNoise.ar(0.5) }.play(outbus: 2)
-
 )
 
-
-/*(
-SynthDef(\panTestEnv, {
-    |out=0, freq=440, amp=0.5, panDur=7, atk=0.05, rel=0.1, gate=1|
-    var sig, pan, env;
-
-    pan = Line.kr(-1, 1, panDur);
-    env = EnvGen.kr(Env.asr(atk, 1, rel), gate, doneAction: 2);
-    sig = SinOsc.ar(freq) * env * amp;
-    sig = Pan2.ar(sig, pan);
-    Out.ar(out, sig);
-}).add;
-)
-
-(
-Pbind(
-    \instrument, \panTestEnv,
-    \freq, 440,
-    \dur, 4,
-    \panDur, 3.8,  // sweep ends just before event spacing
-    \atk, 0.1,
-    \rel, 0.1,
-    \amp, 0.6
-).play();
-)*/
-
-
-////////////////////////////////////////////////////////////////////////////////
-// (3) TRIGGER
-////////////////////////////////////////////////////////////////////////////////
 (
 Synth(\panningSamplePlayer, [
     \bufnum, ~samples[0].bufnum,
-    \amp, 0.8,
+    \amp, 0.4,
     \atk, 0.02,
     \rel, 0.3,
 	\pan, 1,
@@ -378,6 +304,10 @@ Window.closeAll;
 PdefAllGui(Pdef.all.size);
 )
 
+
+////////////////////////////////////////////////////////////////////////////////
+// SCRATCHPAD
+////////////////////////////////////////////////////////////////////////////////
 
 (
 ~clock = TempoClock.new(2);  // 2 beats per second = 120 bpm
