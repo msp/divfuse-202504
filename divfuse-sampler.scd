@@ -184,10 +184,9 @@ Pbind(
 	// \rel, 0.1,
 	\do, Pfunc { |e|
 		{
-            var attack = e[\atk];
-            var release = e[\rel];
 			var amp = e[\amp];
-            var env = Env.new([0, 1, 0], [attack, release], 'lin');
+				// var env = Env.new([0, 1, 0], [attack, release], 'lin');
+            var env = Env.asr(e[\atk], 1, e[\rel]);
             envView.setEnv(env);
 
 			("(%) a: %, r: %, d: %, [%]"
@@ -225,8 +224,10 @@ Pbind(
 
 (
 var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
-var window, envView;
+var window, envViews, v, h;
 
+~numVoices = 10;
+~voices = Dictionary.new;
 centerBase = 3.0;
 centerRange = 1.0;
 speed = 0.1;
@@ -234,18 +235,20 @@ stepSize = 0.1;
 lowerBound = 0.5;
 upperBound = 5.0;
 
-~numVoices = 10;
-~voices = Dictionary.new;
-
 Window.closeAll;
+window = Window("Envs", Rect(100, 100, 400, Window.screenBounds.height/1.6)).front;
+h = HLayout();
+v = VLayout(h);
+window.layout =  v;
+window.front;
+window.alwaysOnTop = true;
 
 (0..~numVoices).do { |i|
 	var voiceName = ("voice" ++ (i + 1).asString.padLeft(2, "0")).asSymbol;
-	window = Window(voiceName, Rect(100, 100, 400, 200)).front;
-	envView = EnvelopeView(window, Rect(20, 20, 360, 160));
+	var envView = EnvelopeView(window, Rect(20, 20, 360, 160));
 	envView.drawLines = true;
-	envView.setEnv(Env.perc(0.01, 0.1));
-
+	envView.setEnv(Env.asr(0.01, 1, 0.3));
+	v.add(envView);
 
 	/*    ~voices[voiceName] = Pdef(voiceName, Pbind(
 	\instrument, \yourSynth,   // Replace \yourSynth with your actual SynthDef name
@@ -259,7 +262,8 @@ Window.closeAll;
 		\bufnum, i,
 		\dur, i+1,
 		\atk, Pseries(0, 1).collect { |i|
-			var t = i / (rrand(24, 96)) * 2pi;  // one full wave cycle over 24-96 events
+			// var t = i / (rrand(24, 96)) * 2pi;  // one full wave cycle over 24-96 events
+			var t = i / 48 * 2pi;  // one full wave cycle over 24-96 events
 			var min = 0.01;
 			var max = 0.9;
 			var a = sin(t) * 0.5 + 0.5;  // [0, 1]
@@ -271,10 +275,8 @@ Window.closeAll;
 		},
 		\do, Pfunc { |e|
 			{
-				var attack = e[\atk];
-				var release = e[\rel];
-				var amp = e[\amp];
-				var env = Env.new([0, 1, 0], [attack, release], 'lin');
+				// var env = Env.new([0, 1, 0], [attack, release], 'lin');
+				var env = Env.asr(e[\atk], 1, e[\rel]);
 				envView.setEnv(env);
 
 				("(%) a: %, r: %, d: %, [%]"
@@ -340,5 +342,5 @@ Routine({
 
 ~fx.set(\trigger, 1);
 
-rrand(24, 96)
+~voices
 
