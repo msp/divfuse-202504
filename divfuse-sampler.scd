@@ -37,6 +37,8 @@ Buffer.freeAll;
 
 
 ~samples = Array.new;
+~synths = Array.new;
+
 // ~sampleDir = "/Users/yourname/Samples/Kicks"
 ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
 
@@ -344,23 +346,95 @@ Routine({
 
 ~voices
 
+~synths = [];
+
 (
-{
-    PanAz.ar(
-        numChans: 6,
-		in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
-		// in: ClipNoise.ar(0.1),
-		// in: Saw.ar(rrand(50, 120), rrand(0.1, 0.3)),
+var vals = Dictionary[
+	\freq -> rrand(50, 120),
+	\amp -> rrand(0.1, 0.3),
+	\pos -> [3, 1, 1/3, 1/5, 1/7].choose,
+	\width -> rrand(0.1, 4)
+];
+
+var synth = Dictionary[
+	\vals -> nil,
+	\sig -> nil
+];
+
+~synths.size.postln;
+synth[\vals] = vals;
+synth[\vals].postln;
+
+synth[\sig] = {
+	PanAz.ar(
+		numChans: 6,
+		// in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
+		// in: ClipNoise.ar(0.05),
+		in: Saw.ar(vals[\freq], vals[\amp]),
 		// in: Saw.ar(rrand(250, 420), rrand(0.1, 0.3)),
 		// in: RLPF.ar(Saw.ar([100,250],0.1), XLine.kr(8000,400,5), 0.05),
 		// in: Klang.ar(`[ Array.rand(12, 600.0, 1000.0), nil, nil ], 1, 0) * 0.05,
 		// pos: LFSaw.kr(MouseX.kr(0.2, 8, 'exponential')).poll,
-		pos: LFSaw.kr(rrand(0.2, 2)),
-        level: 0.5,
-		width: rrand(0.1, 4),
+		// pos: LFSaw.kr(rrand(0.2, 2)),
+		pos: LFSaw.kr(vals[\pos]),
+		// pos: Line.ar(-1, 1, 1),
+		// pos: 1,
+		// level: 0.5,
+		level: 0.3,
+		width: vals[\width],
 		// width: 4,
-        orientation: 0.5
-    );
-// }.scope.trace
-}.play.trace
+		orientation: 0.5
+	);
+	// }.scope.trace
+}.play();
+
+~synths = ~synths ++ [synth];
+~synths.size.postln;
 )
+
+~synths.do({ arg synth, i; i.post; '> '.post; synth.postln });
+
+~synths.do({ arg synth, i; synth[\sig].release(3)});
+
+~synths.do({ arg synth, i; synth[\sig].free  });
+
+~synths = []
+
+~synths[7][\sig].release(3);
+~synths[7].clear;
+
+
+
+
+
+(
+x = { arg spread=1, level=0.3, width=2, center=0.0;
+	SplayAz.ar(
+		6,
+		// SinOsc.ar( { |i| LFNoise2.kr( rrand(10, 20), 200, i + 3 * 100) } ! 10),
+		Saw.ar({ rrand(200, 320) } ! 4, 0.3),
+		// Saw.ar(rrand(50, 120), 0.3) ! 2,
+		spread,
+		level,
+		width,
+		center
+	);
+}.play;
+)
+
+x.release(3)
+
+x.set(\spread, 0.25,   \center, 0);  // msp
+
+x.set(\spread, 1,   \center, 0);  // full n chans
+x.set(\spread, 0.5, \center, -0.25); // less wide
+x.set(\spread, 0, \center, 0);  // mono center (depends on orientation, see PanAz)
+x.set(\spread, 0, \center, -0.25); //
+x.set(\spread, 0.0, \center, 0.5); // mono, but rotate 1 toward the higher channels
+x.set(\spread, 0.5, \center, 0.5); // spread over the higher channels
+x.set(\spread, 0,   \center, -0.25); // all on first channel
+x.set(\spread, 1,   \center, 0);  // full n chans
+
+x.free;
+
+
