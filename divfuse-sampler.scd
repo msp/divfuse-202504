@@ -17,7 +17,6 @@ s.reboot; // or s.boot if you're not changing the device
 // (1b) SETUP - ensure the path to sample folder is correct
 ////////////////////////////////////////////////////////////////////////////////
 
-
 (
 Buffer.freeAll;
 
@@ -40,9 +39,12 @@ Buffer.freeAll;
 ~synths = Array.new;
 
 // ~sampleDir = "/Users/yourname/Samples/Kicks"
-~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
+// ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
+// ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmasthums*";
+~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmastv3*";
 
 PathName(~sampleDir).files.do { |file, i|
+	("Found " ++ file.fileName).postln;
     if(file.extension == "wav") {
         var buf = Buffer.readChannel(s, file.fullPath, channels: [0]);  // mono
 		// ~samples[file.fileNameWithoutExtension] = buf;
@@ -149,9 +151,8 @@ envView.setEnv(Env.perc(0.01, 0.1));  // initial envelope
 	~perlinLikeDur[i] = val;
 };
 
-PdefAllGui(Pdef.all.size);
+// PdefAllGui(Pdef.all.size);
 
-Pdef(\loop10,
 Pbind(
 	\instrument, \panningSamplePlayer,
 	// \bufnum, Prand((0..~samples.size), inf),
@@ -160,8 +161,8 @@ Pbind(
 	// \bufnum, Pseq([19, 20, 21, 22], inf).collect { |i| ~samples[i].bufnum },
 	// \bufnum, Pseq([10, 11, 12, 11, 10], inf).collect { |i| ~samples[i].bufnum },
 	// \bufnum, Pseq([30, 31, 32, 33, 34], inf).collect { |i| ~samples[i].bufnum },
-	\bufnum, 9,
-	\dur, 10,
+	\bufnum, 2,
+	\dur, 0.05,
 	// \bufnum, Pseq([9, 10], inf).collect { |i| ~samples[i].bufnum },
 	// \bufnum, Pseq([5, 6], inf).collect { |i| ~samples[i].bufnum },
 	// \dur, Pseq([3, 1, 4, 2, 1], inf),  // pattern for spacing between events
@@ -212,24 +213,48 @@ Pbind(
 		a;
 	},
 	\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
-	// ).trace.play();
-	);
+	).trace.play();
+// );
 // ).play();
-	);
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 // (5) PATTERN LOOP
 ////////////////////////////////////////////////////////////////////////////////
 
-// 10.asString.padLeft(2, "0")
-
 (
 var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
-var window, envViews, v, h;
+var window, envViews, v, h, durations;
 
-~numVoices = 10;
+~numVoices = 21;
 ~voices = Dictionary.new;
+durations = Dictionary.newFrom(
+	[
+		\1, 1,
+		\2, 2,
+		\3, 3,
+		\4, 4,
+		\5, 5,
+		\6, 6,
+		\7, 22,
+		\8, 8,
+		\9, 9,
+		\10, 10,
+		\11, 11,
+		\12, 12,
+		\13, 13,
+		\14, 14,
+		\15, 15,
+		\16, 16,
+		\17, 17,
+		\18, 18,
+		\19, 19,
+		\20, 20,
+		\21, 21,
+		\22, 22,
+	]
+);
+
 centerBase = 3.0;
 centerRange = 1.0;
 speed = 0.1;
@@ -237,7 +262,7 @@ stepSize = 0.1;
 lowerBound = 0.5;
 upperBound = 5.0;
 
-Window.closeAll;
+// Window.closeAll;
 window = Window("Envs", Rect(100, 100, 400, Window.screenBounds.height/1.6)).front;
 h = HLayout();
 v = VLayout(h);
@@ -246,7 +271,9 @@ window.front;
 window.alwaysOnTop = true;
 
 (0..~numVoices).do { |i|
-	var voiceName = ("voice" ++ (i + 1).asString.padLeft(2, "0")).asSymbol;
+	var fileName = PathName(~samples[i].path).fileName;
+	// var voiceName = ("voice" ++ (i+1).asString.padLeft(2, "0")).asSymbol;
+	var voiceName = ((i+1).asString.padLeft(2, "0") ++ "- "++fileName).asSymbol;
 	var envView = EnvelopeView(window, Rect(20, 20, 360, 160));
 	envView.drawLines = true;
 	envView.setEnv(Env.asr(0.01, 1, 0.3));
@@ -261,8 +288,8 @@ window.alwaysOnTop = true;
 
 	~voices[voiceName] = Pdef(voiceName, Pbind(
 		\instrument, \panningSamplePlayer,
-		\bufnum, i,
-		\dur, i+1,
+		\bufnum, ~samples[i].bufnum,
+		\dur, durations.atFail((i+1).asSymbol, { |j| j }),
 		\atk, Pseries(0, 1).collect { |i|
 			// var t = i / (rrand(24, 96)) * 2pi;  // one full wave cycle over 24-96 events
 			var t = i / 48 * 2pi;  // one full wave cycle over 24-96 events
@@ -275,14 +302,25 @@ window.alwaysOnTop = true;
 		\rel, Pfunc { |e|
 			e[\dur] - e[\atk]
 		},
+		// startpos is randomly chosen between 0 and (buffer duration - event duration)
+		\startpos, Pfunc { |e|
+			// Grab the duration of the buffer (using BufDur.ir so it is evaluated on the language side)
+			var bd = BufDur.ir(e[\bufnum]);
+			var dur = e[\dur];
+			// Return a random number between 0 and (bd - dur)
+			var startpos = rrand(0, (bd - dur).max(0));  // .max(0) ensures we have a non-negative value if bd < dur
+			("startpos: %".format(startpos.round(0.001))).postln;
+			startpos;
+		},
 		\do, Pfunc { |e|
 			{
 				// var env = Env.new([0, 1, 0], [attack, release], 'lin');
 				var env = Env.asr(e[\atk], 1, e[\rel]);
 				envView.setEnv(env);
 
-				("(%) a: %, r: %, d: %, [%]"
+				("(%) s: %, a: %, r: %, d: %, [%]"
 					.format(
+						e[\startpos].round(0.001),
 						e[\amp].round(0.001),
 						e[\atk].round(0.001),
 						e[\rel].round(0.001),
@@ -293,8 +331,9 @@ window.alwaysOnTop = true;
 			}.defer
 		},
 		\amp, Pseries(0, 1).collect { |i|
-			var t = i / rrand(24, 96) * 2pi;  // one full wave cycle over 48 events
-			var min = 0.2;
+			// var t = i / rrand(24, 96) * 2pi;  // one full wave cycle over 48 events
+			var t = i / 48 * 2pi;  // one full wave cycle over 48 events
+			var min = 0.3;
 			var max = 0.6;
 			var a = sin(t) * 0.5 + 0.5;  // [0, 1]
 			a = a * (max - min) + min;  // [min to max]
@@ -306,6 +345,7 @@ window.alwaysOnTop = true;
 };
 
 PdefAllGui(Pdef.all.size);
+// s.scope;
 )
 
 
@@ -368,10 +408,11 @@ synth[\vals].postln;
 synth[\sig] = {
 	PanAz.ar(
 		numChans: 6,
-		// in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
+		in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
 		// in: ClipNoise.ar(0.05),
-		in: Saw.ar(vals[\freq], vals[\amp]),
+		// in: Saw.ar(vals[\freq], vals[\amp]),
 		// in: Saw.ar(rrand(250, 420), rrand(0.1, 0.3)),
+		// in: Saw.ar(220, 0.3),
 		// in: RLPF.ar(Saw.ar([100,250],0.1), XLine.kr(8000,400,5), 0.05),
 		// in: Klang.ar(`[ Array.rand(12, 600.0, 1000.0), nil, nil ], 1, 0) * 0.05,
 		// pos: LFSaw.kr(MouseX.kr(0.2, 8, 'exponential')).poll,
@@ -380,7 +421,7 @@ synth[\sig] = {
 		// pos: Line.ar(-1, 1, 1),
 		// pos: 1,
 		// level: 0.5,
-		level: 0.3,
+		level: 0.5,
 		width: vals[\width],
 		// width: 4,
 		orientation: 0.5
@@ -400,11 +441,18 @@ synth[\sig] = {
 
 ~synths = []
 
-~synths[7][\sig].release(3);
-~synths[7].clear;
+~synths[0][\sig].release(3);
+~synths[2].clear;
 
 
+rrand(250, 420)
 
+(
+{
+	// Saw.ar(220, 0.2)
+	SinOsc.ar(rrand(50, 120), 0.0, 0.4)
+}.play;
+)
 
 
 (
