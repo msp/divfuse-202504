@@ -1,12 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 // (3) PATTERN LOOP
 ////////////////////////////////////////////////////////////////////////////////
-
 (
 var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
 var window, envViews, v, h, durations;
 
-~numVoices = 21;
+~numVoices = ~samples.size -1;
 ~voices = Dictionary.new;
 durations = Dictionary.newFrom(
 	[
