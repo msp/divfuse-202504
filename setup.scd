@@ -2,15 +2,9 @@
 //
 // SETUP
 //
-// Sampler and synthesizer
-// https://github.com/musikinformatik/SuperDirt
-//
-// Duartion patches based on work by Nathan Ho
-// https://nathan.ho.name
-//
 // Most things found and hacked from vairous sources online. Respect!
 //
-// We run the SETUP to define the audio system and load the SEQUENCES.
+// We run the SETUP to define the audio system and load the PATTERNS.
 //
 // The CONTROL section allows us to start/stop each sequence.
 // Multiple sequences can be played together for layering.
@@ -27,50 +21,66 @@ var foo;
 
 s.meter;
 s.plotTree;
+s.scope;
 
-
+"===============================================".postln;
 "SETUP =========================================".postln;
-
-// ~dirt.free;
+"===============================================".postln;
 // Server.freeAll;
-
 // Pdef.removeAll;
 // Pbindef.removeAll;
 
+Buffer.freeAll;
+
 ~oscClient = NetAddr.new("127.0.0.1", 1234);
-SuperDirt.default = ~dirt;
+~samples = Array.new;
+~synths = Array.new;
+// ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
+~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmastv3*";
 
-// The samples need to exist on your computer!
-// ~dirt.loadSoundFiles("/Users/Sally/Dropbox/oily-cart-awu-samples/*");
-// ~dirt.loadSoundFiles("/Dropbox-shared/oily-cart-awu-samples/*");
-~dirt.loadSoundFiles("/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/oily-cart-awu-samples/*");
-~dirt.loadSoundFiles("/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/iklectik-202209/*");
-~dirt.loadSoundFiles("/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/spectral-202312/*");
-~dirt.loadSoundFiles("/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/*");
+"\n".postln;
+"----------------------------------------------".postln;
+"Loading Samples ------------------------------".postln;
+"----------------------------------------------".postln;
+"\n".postln;
 
+PathName(~sampleDir).files.do { |file, i|
+	("...found: " ++ file.fullPath).postln;
+    if(file.extension == "wav") {
+        var buf = Buffer.readChannel(s, file.fullPath, channels: [0]);  // mono
+		Buffer.read(s, file.fullPath);
+		// ~samples[file.fileNameWithoutExtension] = buf;
+		~samples = ~samples.add(buf);
+        ("......loaded: " ++ file.fileName).postln;
+    }
+};
 
-// Run to test to check we have sound. You should hear a cymbal
-(type:\dirt, orbit: ~out1, s: \bouncer, n: 0, speed: 1.0, pan: 0.25, gain: 0.8).play;
-(type:\dirt, orbit: ~out1_2, s: \cr, n: 0, speed: 0.3, pan: 0.75, gain: 0.6).play;
+"----------------------------------------------".postln;
+("| Total loaded: " ++ ~samples.size).postln;
+"----------------------------------------------".postln;
 
-(type:\dirt, orbit: ~out1_2, s: \vowelsfemale, n: 36.rand, speed: 1.0, pan: 0.5, gain: 0.95).play;
-
+"\n".postln;
+"----------------------------------------------".postln;
+"Loading Engine  ------------------------------".postln;
+"----------------------------------------------".postln;
+"\n".postln;
 
 ~enginePath = PathName.new(thisProcess.nowExecutingPath.dirname+/+"engine/");
 // ~enginePath.entries.postln;
 
 ~enginePath.files.do{|aFile|
-	"found ----------------------------------------".postln;
     aFile.fullPath.postln;
 
 	// 95 == '_"
 	if(aFile.fileName[0].ascii != 95) {
-		"loading >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>".postln;
+		"(loading).......................................".postln;
 		load(aFile.fullPath);
 	} {
 		"......................................(ignoring)".postln;
 	};
 };
 
+"===============================================".postln;
 "DONE SETUP ====================================".postln;
+"===============================================".postln;
 )
