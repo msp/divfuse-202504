@@ -29,7 +29,7 @@ vals = vals.add(Dictionary[
 	// \width -> rrand(3, 4),
 	// \width -> rrand(0.5, 1.5),
 	\width -> 3,
-	\speed -> 0.01,
+	\speed -> 0.0,
 ]);
 
 vals = vals.add(Dictionary[
@@ -38,7 +38,7 @@ vals = vals.add(Dictionary[
 	\amp -> rrand(0.1, 0.3),
 	\pos -> 0.3,
 	\width -> 3,
-	\speed -> 0.01,
+	\speed -> 0.0,
 ]);
 
 vals = vals.add(Dictionary[
@@ -63,40 +63,36 @@ vals = vals.add(Dictionary[
 ~synths.size.postln;
 
 vals.do { |val, i|
-	var sigAmp, ampLFO;
 	var synth = Dictionary[
 		\vals -> nil,
 		\sig -> nil
 	];
 
 	synth[\vals] = val;
+	// i.post; '>>> '.post; val.postln;
 
-	i.post; '>>> '.post; val.postln;
-
-/*	ampLFO = LFTri.kr(
-		freq: speed,
-		iphase: 3,
-		mul: amp,
-		add: amp
-	);*/
-
-	// sigAmp = if(speed == 0) { amp } { ampLFO };
-	// "sigAmp = \t".post; sigAmp.postln;
 
 	SynthDef(val[\name],
 		{
 			arg out=0, amp=0.3, freq=100, level=0.3, pos=0.5, speed=0.1, width=1;
+			var sigAmp, ampLFO;
+
+			ampLFO = LFTri.kr(
+				freq: speed,
+				iphase: 3,
+				mul: amp,
+				add: amp
+			);
+
+			// compile time comparison
+			sigAmp = if(val[\speed] == 0) { amp } { ampLFO };
+
 			Out.ar(out,
 				PanAz.ar(
 					numChans: 6,
 					in: Saw.ar(
 						freq: freq,
-						mul: LFTri.kr(
-							freq: speed,
-							iphase: 3,
-							mul: amp,
-							add: amp
-						)
+						mul: sigAmp
 					),
 
 					pos: LFSaw.kr(
@@ -114,12 +110,13 @@ vals.do { |val, i|
 			);
 	}).add;
 
-
-	/*		"amp = \t".post; amp.postln;
+	/*
+	"amp = \t".post; amp.postln;
 	"freq = \t".post; freq.postln;
 	"pos = \t".post; pos.postln;
 	"speed = \t".post; speed.postln;
-	"width = \t".post; width.postln;*/
+	"width = \t".post; width.postln;
+	*/
 
 	synth[\sig] = Synth(val[\name],
 		[
@@ -130,8 +127,6 @@ vals.do { |val, i|
 			"width", val[\width],
 		]
 	);
-
-	synth.postln;
 
 	~synths = ~synths.add(synth);
 
