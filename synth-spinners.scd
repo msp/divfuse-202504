@@ -1,0 +1,228 @@
+////////////////////////////////////////////////////////////////////////////////
+// SYNTH SPIINERs
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////
+// this is lush!
+////////////////
+// No LFO
+// 6> Dictionary[ (sig -> Synth('temp__113' : 1278)), (vals -> Dictionary[ (amp -> 0.23485150337219), (pos -> 0.6), (freq -> 92), (speed -> 1.5), (width -> 3) ]) ]
+// No LFO
+// 8> Dictionary[ (sig -> Synth('temp__115' : 1280)), (vals -> Dictionary[ (amp -> 0.19711318016052), (pos -> 0.3), (freq -> 233), (speed -> 1.5), (width -> 3) ]) ]
+// LFO
+// 9> Dictionary[ (sig -> Synth('temp__116' : 1281)), (vals -> Dictionary[ (amp -> 0.25121099948883), (pos -> 0.3), (freq -> 415), (speed -> 0.1), (width -> 3) ]) ]
+// LFO
+// 10> Dictionary[ (sig -> Synth('temp__117' : 1282)), (vals -> Dictionary[ (amp -> 0.19814238548279), (pos -> 0.5), (freq -> 740), (speed -> 0.1), (width -> 3) ]) ]
+
+
+(
+var synth = Dictionary[
+	\vals -> nil,
+	\sig -> nil
+];
+
+var vals = Array.new;
+
+vals = vals.add(Dictionary[
+	// \freq -> rrand(50, 120),
+	// \amp -> rrand(0.1, 0.3),
+	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
+	// \width -> rrand(0.1, 4)
+	\freq -> 92,
+	\amp -> rrand(0.1, 0.3),
+	// \amp -> 0.15,
+	\pos -> 0.6,
+	// \width -> rrand(3, 4),
+	// \width -> rrand(0.5, 1.5),
+	\width -> 3,
+	\speed -> 0,
+]);
+
+vals = vals.add(Dictionary[
+	\freq -> 233,
+	\amp -> rrand(0.1, 0.3),
+	\pos -> 0.3,
+	\width -> 3,
+	\speed -> 0,
+]);
+
+// vals[1] = Dictionary[
+// 	// \freq -> rrand(50, 120),
+// 	// \amp -> rrand(0.1, 0.3),
+// 	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
+// 	// \width -> rrand(0.1, 4)
+// 	\freq -> [92, 233, 415, 740],
+// 	\amp -> rrand(0.1, 0.3),
+// 	// \amp -> 0.15,
+// 	\pos -> [0.6, 0.3, 0.3, 0.5],
+// 	// \width -> rrand(3, 4),
+// 	// \width -> rrand(0.5, 1.5),
+// 	\width -> [3, 3, 3, 3],
+// 	\speed -> [0, 0.01, 0.1, 0.1],
+// ];
+
+
+~synths = [];
+~synths.size.postln;
+
+
+vals.do { |val, i|
+	synth[\vals] = val;
+	// synth[\vals].postln;
+
+	synth[\sig] = {
+		arg amp=0.3, freq=740, level=0.3, pos=0.5, speed=0.1, width=1;
+		var sigAmp, ampLFO;
+
+		amp = synth[\vals][\amp];
+		freq = synth[\vals][\freq];
+		pos = synth[\vals][\pos];
+		speed = synth[\vals][\speed];
+		width = synth[\vals][\width];
+
+		"amp = \t".post; amp.postln;
+		"freq = \t".post; freq.postln;
+		"pos = \t".post; pos.postln;
+		"speed = \t".post; speed.postln;
+		"width = \t".post; width.postln;
+
+		ampLFO = LFTri.kr(
+			freq: speed,
+			iphase: 3,
+			mul: amp,
+			add: amp
+		);
+
+		sigAmp = if(speed == 0) { amp } { ampLFO };
+		"sigAmp = \t".post; sigAmp.postln;
+
+		PanAz.ar(
+			numChans: 6,
+			// in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
+			// in: SinOsc.ar(freq, 0.0, 0.5),
+			// in: ClipNoise.ar(0.05),
+			in: Saw.ar(
+				freq: freq,
+				mul: sigAmp
+			),
+			/*		in: RLPF.ar
+			(
+			in: LFPulse.ar
+			(
+			// SinOsc.kr(0.2, 0, 10, 21),
+			15,
+			0.1,
+			0.1,
+			),
+			freq: 100,
+			rq: 0.1,
+			mul: 0.6
+			).clip2(0.4),*/
+			// in: Saw.ar(73, amp),
+			// in: Saw.ar(rrand(250, 420), rrand(0.1, 0.3)),
+			// in: Saw.ar(220, 0.3),
+			// in: RLPF.ar(Saw.ar([100,250],0.1), XLine.kr(8000,400,5), 0.05),
+			// in: Klang.ar(`[ Array.rand(12, 600.0, 1000.0), nil, nil ], 1, 0) * 0.05,
+			// pos: LFSaw.kr(MouseX.kr(0.2, 8, 'exponential')).poll,
+			// pos: LFSaw.kr(rrand(0.2, 2)),
+			// pos: Line.ar(-1, 1, 1),
+			// pos: LFSaw.kr(freq: 4, iphase: 3, mul: 0.3, add: 0.3) * LFTri.kr(0.5),
+			pos: LFSaw.kr(
+				freq: pos,
+				iphase: LFTri.kr(
+					freq: 0.03,
+					mul: 1,
+					add: 1
+				)
+			),
+			level: level,
+			width: width,
+			orientation: 0.5
+		);
+		// }.scope.trace
+	}.play;
+
+	~synths = ~synths ++ [synth];
+
+};
+~synths.size.postln;
+)
+
+
+// reset
+~synths = []
+
+// print
+~synths.do({ arg synth, i; i.post; '> '.post; synth.postln });
+
+// release all
+~synths.do({ arg synth, i; synth[\sig].release(3)});
+
+
+// force a release
+~synths[1][\sig].release(3);
+// and then clear
+~synths[1].clear;
+// FADER
+
+~synths[0][\sig].set(\level, 0.15);
+~synths[0][\sig].set(\pos, 0.5);
+
+~synths[0][\sig].nodeID
+
+s.sendMsg("/n_free", ~synths[0][\sig].nodeID);
+
+s.sendMsg("/n_set", ~synths[3][\sig].nodeID, "gate", 0)
+
+~synths.size
+
+
+
+
+/*0> Dictionary[ (sig -> Synth('temp__107' : 1272)), (vals -> Dictionary[ (amp -> 0.15), (pos -> 1), (freq -> 740), (speed -> 0.3), (width -> 3) ]) ]
+1> Dictionary[ (sig -> Synth('temp__108' : 1273)), (vals -> Dictionary[ (amp -> 0.15), (pos -> 1), (freq -> 213), (speed -> 0.1), (width -> 4) ]) ]
+2> Dictionary[  ]
+3> Dictionary[  ]
+4> Dictionary[  ]
+5> Dictionary[  ]
+6> Dictionary[ (sig -> Synth('temp__113' : 1278)), (vals -> Dictionary[ (amp -> 0.23485150337219), (pos -> 0.6), (freq -> 92), (speed -> 1.5), (width -> 3) ]) ]
+7> Dictionary[  ]*/
+
+
+/*0> Dictionary[  ]
+1> Dictionary[  ]
+2> Dictionary[  ]
+3> Dictionary[  ]
+4> Dictionary[  ]
+5> Dictionary[  ]
+6> Dictionary[ (sig -> Synth('temp__113' : 1278)), (vals -> Dictionary[ (amp -> 0.23485150337219), (pos -> 0.6), (freq -> 92), (speed -> 1.5), (width -> 3) ]) ]
+7> Dictionary[  ]
+8> Dictionary[ (sig -> Synth('temp__115' : 1280)), (vals -> Dictionary[ (amp -> 0.19711318016052), (pos -> 0.3), (freq -> 233), (speed -> 1.5), (width -> 3) ]) ]*/
+
+(
+{
+	LFTri.ar(
+		420,
+		0,
+		LFTri.kr(0.1, 0, 0.3, 0.3)
+	)
+}.play
+
+)
+
+(
+{
+	// LFTri.kr(freq: 1, iphase: 3, mul: 0.3, add: 0.3)
+	LFSaw.kr(freq: 4, iphase: 0, mul: 1, add: 1)
+}.plot(1)
+)
+
+rrand(250, 420)
+
+(
+{
+	// Saw.ar(220, 0.2)
+	SinOsc.ar(rrand(50, 120), 0.0, 0.4)
+}.play;
+)
+
