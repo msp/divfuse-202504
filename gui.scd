@@ -12,13 +12,18 @@ var foo;
 )
 
 
-
 (
+var w = Window("Synths", Rect(20, 400, 440, 600));
+w.front;
+w.view.decorator = FlowLayout(w.view.bounds);
+w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
+	[\h,\v].choose, 100, rrand(0.1,0.9));
+
+
 ~synths.do { |synth, i|
-	var w, startButton, posControl, levelControl, speedControl;
+	var startButton, posControl, levelControl, speedControl, label;
 	var balanceControl, ampControl;
 	var id, cmdPeriodFunc;
-
 
 	'---------------------------------------'.postln;
 	'nodeID = '.post; synth[\sig].nodeID.postln;
@@ -28,15 +33,18 @@ var foo;
 	// id = s.nextNodeID; // generate a note id.
 	id = synth[\sig].nodeID;
 
-	// make the window
-	w = Window(synth[\vals][\name], Rect(20, 400, 440, 180));
-	w.front; // make window visible and front window.
-	w.view.decorator = FlowLayout(w.view.bounds);
 
-	w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
-		[\h,\v].choose, 100, rrand(0.1,0.9));
+	w.view.decorator.nextLine;
+	// label = StaticText(w, Rect(w.bounds.extent.x.rand, w.bounds.extent.y.rand, 160, 16)
+	label = StaticText(w, 400 @ 24);
+	label.string = synth[\vals][\name];
+	label.stringColor = Color.white;
+	label.align = \centre;
+	label.background=Color.grey;
+	label.font = Font("Monaco", 16, bold: true);
 
 	// add a button to start and stop the sound.
+	w.view.decorator.nextLine;
 	startButton = Button(w, 75 @ 24);
 	startButton.states = [
 		["Start", Color.black, Color.green],
@@ -59,6 +67,8 @@ var foo;
 		};
 	};
 
+	// startButton.align = \right;
+
 	// w.view.decorator.nextLine;
 	// cutoffControl = EZSlider(w, 400 @ 24, "Cutoff", ControlSpec(200, 5000, \exp),
 	// {|ez| s.sendMsg("/n_set", id, "fc", ez.value); }, 1000);
@@ -73,7 +83,7 @@ var foo;
 		{|ez| s.sendMsg("/n_set", id, "pos", ez.value); }, synth[\vals][\pos]);
 
 	w.view.decorator.nextLine;
-	speedControl = EZSlider(w, 400 @ 24, "Amp LFO Speed", ControlSpec(0.1, 4.0),
+	speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 4.0),
 		{|ez| s.sendMsg("/n_set", id, "speed", ez.value); }, synth[\vals][\speed]);
 
 	// set start button to zero upon a cmd-period
