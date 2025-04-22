@@ -11,17 +11,20 @@ var foo;
 };
 )
 
+(1.0).dbamp;
+
+"1.0".asFloat.ampdb
 
 (
-var w = Window("Synths", Rect(20, 400, 440, 600));
+var w = Window("Synths", Rect(20, 400, 440, Window.screenBounds.height/1.4 ));
 w.front;
 w.view.decorator = FlowLayout(w.view.bounds);
-w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
-	[\h,\v].choose, 100, rrand(0.1,0.9));
+w.view.background = Color.grey.alpha = 0.1;
+// w.view.background = Color.green.alpha = 0.1;
 
 
 ~synths.do { |synth, i|
-	var startButton, posControl, levelControl, speedControl, label;
+	var startButton, posControl, levelControl, speedControl, cutoffControl, label;
 	var balanceControl, ampControl;
 	var id, cmdPeriodFunc;
 
@@ -37,13 +40,40 @@ w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
 	w.view.decorator.nextLine;
 	// label = StaticText(w, Rect(w.bounds.extent.x.rand, w.bounds.extent.y.rand, 160, 16)
 	label = StaticText(w, 400 @ 24);
-	label.string = synth[\vals][\name];
+	label.string = synth[\vals][\name].toUpper;
 	label.stringColor = Color.white;
-	label.align = \centre;
-	label.background=Color.grey;
+	label.align = \center;
+	label.background=Color.grey.alpha = 0.6;
 	label.font = Font("Monaco", 16, bold: true);
 
+	w.view.decorator.nextLine;
+	w.view.decorator.nextLine;
+	w.view.decorator.nextLine;
+	levelControl = EZSlider(w, 400 @ 24, "Level", \db,
+		{|ez| s.sendMsg("/n_set", id, "level", ez.value.dbamp); }, synth[\vals][\level].ampdb);
+
+	w.view.decorator.nextLine;
+	cutoffControl = EZSlider(w, 400 @ 24, "Cutoff", ControlSpec(50, 20000, \exp),
+	{|ez| s.sendMsg("/n_set", id, "cutoff", ez.value); }, synth[\vals][\cutoff]);
+
+	w.view.decorator.nextLine;
+	cutoffControl = EZSlider(w, 400 @ 24, "Res", ControlSpec(0.01, 1.0),
+	{|ez| s.sendMsg("/n_set", id, "res", ez.value); }, synth[\vals][\res]);
+
+	w.view.decorator.nextLine;
+	posControl = EZSlider(w, 400 @ 24, "Pan Pos", ControlSpec(0.1, 4.0),
+		{|ez| s.sendMsg("/n_set", id, "pos", ez.value); }, synth[\vals][\pos]);
+
+	if (synth[\vals][\speed] > 0) {
+		w.view.decorator.nextLine;
+		speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 4.0),
+			{|ez| s.sendMsg("/n_set", id, "speed", ez.value); }, synth[\vals][\speed]);
+	};
+
+
 	// add a button to start and stop the sound.
+	w.view.decorator.nextLine;
+	w.view.decorator.nextLine;
 	w.view.decorator.nextLine;
 	startButton = Button(w, 75 @ 24);
 	startButton.states = [
@@ -52,7 +82,8 @@ w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
 	];
 	startButton.action = {|view|
 		if (view.value == 1) {
-			s.sendMsg("/n_set", id, "level", 0.5);
+			synth[\sig].run(true);
+			// s.sendMsg("/n_set", id, "level", synth[\vals][\level].dbamp);
 			// start sound
 			/*			s.sendMsg("/s_new", "window-test", id, 0, 0,
 			"note", noteControl.value,
@@ -63,28 +94,16 @@ w.view.background = HiliteGradient(Color.rand(0.0,1.0),Color.rand(0.0,1.0),
 		};
 		if (view.value == 0) {
 			// set gate to zero to cause envelope to release
-			s.sendMsg("/n_set", id, "level", 0);
+			// s.sendMsg("/n_set", id, "level", 0);
+			synth[\sig].run(false);
 		};
 	};
 
-	// startButton.align = \right;
-
-	// w.view.decorator.nextLine;
-	// cutoffControl = EZSlider(w, 400 @ 24, "Cutoff", ControlSpec(200, 5000, \exp),
-	// {|ez| s.sendMsg("/n_set", id, "fc", ez.value); }, 1000);
-
 	w.view.decorator.nextLine;
-	levelControl = EZSlider(w, 400 @ 24, "Level", \db,
-		{|ez| s.sendMsg("/n_set", id, "level", ez.value.dbamp); }, -6);
-
-
 	w.view.decorator.nextLine;
-	posControl = EZSlider(w, 400 @ 24, "Pos", ControlSpec(0.1, 4.0),
-		{|ez| s.sendMsg("/n_set", id, "pos", ez.value); }, synth[\vals][\pos]);
-
 	w.view.decorator.nextLine;
-	speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 4.0),
-		{|ez| s.sendMsg("/n_set", id, "speed", ez.value); }, synth[\vals][\speed]);
+	w.view.decorator.nextLine;
+	w.view.decorator.nextLine;
 
 	// set start button to zero upon a cmd-period
 	cmdPeriodFunc = { startButton.value = 0; };

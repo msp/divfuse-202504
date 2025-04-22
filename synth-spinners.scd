@@ -18,6 +18,7 @@ var vals = Array.new;
 
 vals = vals.add(Dictionary[
 	\name -> "voice1".asSymbol,
+	\level -> 0.5,
 	// \freq -> rrand(50, 120),
 	// \amp -> rrand(0.1, 0.3),
 	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
@@ -25,6 +26,8 @@ vals = vals.add(Dictionary[
 	\freq -> 92,
 	\amp -> rrand(0.1, 0.3),
 	// \amp -> 0.15,
+	\cutoff -> 440,
+	\res -> 1.0,
 	\pos -> 0.6,
 	// \width -> rrand(3, 4),
 	// \width -> rrand(0.5, 1.5),
@@ -34,8 +37,11 @@ vals = vals.add(Dictionary[
 
 vals = vals.add(Dictionary[
 	\name -> "voice2".asSymbol,
+	\level -> 0.3,
 	\freq -> 233,
 	\amp -> rrand(0.1, 0.3),
+	\cutoff -> 440,
+	\res -> 1.0,
 	\pos -> 0.3,
 	\width -> 3,
 	\speed -> 0.0,
@@ -43,8 +49,11 @@ vals = vals.add(Dictionary[
 
 vals = vals.add(Dictionary[
 	\name -> "voice3".asSymbol,
+	\level -> 0.3,
 	\freq -> 415,
 	\amp -> rrand(0.1, 0.3),
+	\cutoff -> 440,
+	\res -> 1.0,
 	\pos -> 0.3,
 	\width -> 3,
 	\speed -> 0.1,
@@ -52,8 +61,11 @@ vals = vals.add(Dictionary[
 
 vals = vals.add(Dictionary[
 	\name -> "voice4".asSymbol,
+	\level -> 0.3,
 	\freq -> 740,
 	\amp -> rrand(0.1, 0.3),
+	\cutoff -> 440,
+	\res -> 1.0,
 	\pos -> 0.5,
 	\width -> 3,
 	\speed -> 0.1,
@@ -74,7 +86,7 @@ vals.do { |val, i|
 
 	SynthDef(val[\name],
 		{
-			arg out=0, amp=0.3, freq=100, level=0.3, pos=0.5, speed=0.1, width=1;
+			arg out=0, amp=0.3, freq=100, level=0.3, pos=0.5, speed=0.1, width=1, cutoff=440, res=0.01;
 			var sigAmp, ampLFO;
 
 			ampLFO = LFTri.kr(
@@ -90,11 +102,19 @@ vals.do { |val, i|
 			Out.ar(out,
 				PanAz.ar(
 					numChans: 6,
-					in: Saw.ar(
-						freq: freq,
-						mul: sigAmp
+					in: RLPF.ar(
+						in: Saw.ar(
+							freq: freq,
+							mul: sigAmp
+						),
+						freq: cutoff,
+						// freq: LFPar.kr(
+						// 	freq: pos/3,
+						// 	iphase: 0,
+						// 	mul: cutoff - 50,
+						// add: cutoff),
+						rq: res
 					),
-
 					pos: LFSaw.kr(
 						freq: pos,
 						iphase: LFTri.kr(
@@ -126,7 +146,7 @@ vals.do { |val, i|
 			"speed", val[\speed],
 			"width", val[\width],
 		]
-	);
+	).run(false);
 
 	~synths = ~synths.add(synth);
 
@@ -157,12 +177,18 @@ vals.do { |val, i|
 
 ~synths[0][\sig].nodeID
 
+~synths[0][\sig]
+
 s.sendMsg("/n_free", ~synths[0][\sig].nodeID);
 
 // s.sendMsg("/n_set", ~synths[0][\sig].nodeID, "gate", 0)
 s.sendMsg("/n_set", ~synths[0][\sig].nodeID, "pos", 0.5)
 
 ~synths.size
+
+z = Synth(\voice1)
+
+z.pause
 
 
 
@@ -201,9 +227,11 @@ s.sendMsg("/n_set", ~synths[0][\sig].nodeID, "pos", 0.5)
 (
 {
 	// LFTri.kr(freq: 1, iphase: 3, mul: 0.3, add: 0.3)
-	LFSaw.kr(freq: 4, iphase: 0, mul: 1, add: 1)
+	LFPar.kr(freq: 4, iphase: 0, mul: 750, add: 800)
 }.plot(1)
 )
+
+{LFPar.ar(1, 2)}.plot(1)
 
 rrand(250, 420)
 
