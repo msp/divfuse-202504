@@ -36,7 +36,8 @@ Buffer.freeAll;
 ~samples = Array.new;
 ~synths = Array.new;
 // ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
-~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmastv3*";
+// ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmastv4*";
+~sampleDir = "/Users/spatial/Documents/music-icld/music-2025/Samples/divfuse-2504/halfmastv5trim*";
 
 "\n".postln;
 "----------------------------------------------".postln;

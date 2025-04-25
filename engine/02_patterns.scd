@@ -15,7 +15,7 @@ durations = Dictionary.newFrom(
 		\4, 4,
 		\5, 5,
 		\6, 6,
-		\7, 22,
+		\7, 7,
 		\8, 8,
 		\9, 9,
 		\10, 10,
@@ -82,7 +82,7 @@ window.alwaysOnTop = true;
 			e[\dur] - e[\atk]
 		},
 		// startpos is randomly chosen between 0 and (buffer duration - event duration)
-		\startpos, Pfunc { |e|
+/*		\startPos, Pfunc { |e|
 			// Grab the duration of the buffer (using BufDur.ir so it is evaluated on the language side)
 			var bd = BufDur.ir(e[\bufnum]);
 			var dur = e[\dur];
@@ -90,13 +90,14 @@ window.alwaysOnTop = true;
 			var startpos = rrand(0, (bd - dur).max(0));  // .max(0) ensures we have a non-negative value if bd < dur
 			// ("startpos: %".format(startpos.round(0.001))).postln;
 			startpos;
-		},
+		},*/
+		// \startPos, 1000,
 		\do, Pfunc { |e|
 			{
 				var env = Env.asr(e[\atk], 1, e[\rel]);
 				envView.setEnv(env);
 
-				("s: %, a: %, r: %, d: %, [%]"
+				("amp: %, a: %, r: %, d: %, [%]"
 					.format(
 						// e[\startpos].round(0.001),
 						e[\amp].round(0.001),
@@ -110,8 +111,8 @@ window.alwaysOnTop = true;
 		},
 		\amp, Pseries(0, 1).collect { |i|
 			// var t = i / rrand(24, 96) * 2pi;  // one full wave cycle over 48 events
-			var t = i / 48 * 2pi;  // one full wave cycle over 48 events
-			var min = 0.3;
+			var t = i / 96 * 2pi;  // one full wave cycle over 48 events
+			var min = 0.1;
 			var max = 0.6;
 			var a = sin(t) * 0.5 + 0.5;  // [0, 1]
 			a = a * (max - min) + min;  // [min to max]
