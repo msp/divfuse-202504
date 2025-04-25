@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// (3) PATTERN LOOP
+// (3) PATTERNS
 ////////////////////////////////////////////////////////////////////////////////
 (
 var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
@@ -43,66 +43,272 @@ lowerBound = 0.5;
 upperBound = 5.0;
 
 // Pdef.removeAll;
+
 // Pdef.all.do { |p|
 // 	p.postln;
 // };
 
 
 // Voice 1 ////////////////////////////////////////////////////////////////////
-thisBuf = ~samples[0];
+thisBuf = ~samples[8];
 
 Pdef(~namer.(thisBuf, 0),
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
-		\rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 0).choose.midiratio }),
-		\dur, 1,
+		\dur, 7,
 		\panDur, Pkey(\dur),
 		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
 		\rel, Pfunc { |e| e[\dur] - e[\atk] },
-		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
 		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.1, 0.6, 96) },
 		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
-		\do, Pfunc({ |ev| ~debug.(ev) }),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
 ));
 
 // Voice 2 ////////////////////////////////////////////////////////////////////
-thisBuf = ~samples[1];
+thisBuf = ~samples[9];
 
-Pdef(~namer.(thisBuf, 0),
+Pdef(~namer.(thisBuf, 1),
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
-		\rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
-		\dur, 2,
+		\dur, 10.3,
 		\panDur, Pkey(\dur),
 		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
 		\rel, Pfunc { |e| e[\dur] - e[\atk] },
-		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
 		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.1, 0.6, 96) },
 		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
-		\do, Pfunc({ |ev| ~debug.(ev) }),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
 ));
 
 // Voice 3 ////////////////////////////////////////////////////////////////////
-thisBuf = ~samples[2];
+thisBuf = ~samples[10];
 
-Pdef(~namer.(thisBuf, 0),
+Pdef(~namer.(thisBuf, 2),
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
-		\rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
-		\dur, 0.05,
+		\dur, 14.2,
 		\panDur, Pkey(\dur),
 		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
 		\rel, Pfunc { |e| e[\dur] - e[\atk] },
 		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
 		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.1, 0.6, 96) },
 		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
-		\do, Pfunc({ |ev| ~debug.(ev) }),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
 ));
+
+// Voice 4 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[14];
+
+Pdef(~namer.(thisBuf, 3),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		\dur, 19.2,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.5, 0.7, 96) },
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 5 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[15];
+
+Pdef(~namer.(thisBuf, 4),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, Pseq([thisBuf.bufnum, ~samples[19]], inf),
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		// \rate, rrand(-1, 1).midiratio,
+		\dur, 20,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, 0.4,
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 6 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[16];
+
+Pdef(~namer.(thisBuf, 5),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		\dur, 30,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		// \amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.2, 0.6, 96) },
+		\amp, 0.6,
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 7 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[17];
+
+Pdef(~namer.(thisBuf, 6),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		\dur, 19.2,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		// \amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.1, 0.6, 96) },
+		\amp, 0.5,
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 8 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[11];
+
+Pdef(~namer.(thisBuf, 7),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		\dur, 0.8,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
+		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.6, 96) },
+		\out, Pseq([~out1_2], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 9 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[12];
+
+Pdef(~namer.(thisBuf, 8),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		\dur, 0.6,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.5, 96) },
+		\out, Pseq([~out3_4], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 10 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[13];
+
+Pdef(~namer.(thisBuf, 9),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		// \rate, rrand(-1, 1).midiratio,
+		\dur, 0.3,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.7) }),
+		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.25, 96) },
+		// \out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		\out, Pseq([~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 11 ////////////////////////////////////////////////////////////////////
+// Manually start / stop
+thisBuf = ~samples[14];
+
+Pdef(~namer.(thisBuf, 10),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		\dur, 4,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		\startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.6) }),
+		\amp, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.6, 96) },
+		\out, Pseq([~out1_2, ~out3_4, ~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 12 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[19];
+
+Pdef(~namer.(thisBuf, 11),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		// \dur, 24.6,
+		\dur, 2.4,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, 0.4,
+		\out, Pseq([~out1_2], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 13 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[18];
+
+Pdef(~namer.(thisBuf, 12),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		\dur, 4.8,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, 0.4,
+		\out, Pseq([~out3_4], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
+// Voice 14 ////////////////////////////////////////////////////////////////////
+thisBuf = ~samples[19];
+
+Pdef(~namer.(thisBuf, 13),
+	Pbind(
+		\instrument, \panningSamplePlayer,
+		\bufnum, thisBuf.bufnum,
+		// \rate, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+		\rate, 2.midiratio,
+		\dur, 4.8,
+		\panDur, Pkey(\dur),
+		\atk, Pseries(0, 1).collect { |i| ~lfo1.(i, 0.01, 0.9, 48) },
+		\rel, Pfunc { |e| e[\dur] - e[\atk] },
+		// \startPos, Pfunc({ rrand(0, thisBuf.numFrames * 0.2) }),
+		\amp, 0.4,
+		\out, Pseq([~out5_6], inf),
+		// \do, Pfunc({ |ev| ~debug.(ev) }),
+));
+
 
 
 
 PdefAllGui(Pdef.all.size);
 )
+
+// Pdef.removeAll;
+
+// ~samples.size
