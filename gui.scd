@@ -16,21 +16,49 @@ var foo;
 "1.0".asFloat.ampdb
 
 (
-var w = Window("Synths", Rect(20, 400, 440, Window.screenBounds.height/1.4 ));
-w.front;
-w.view.decorator = FlowLayout(w.view.bounds);
-w.view.background = Color.grey.alpha = 0.1;
-// w.view.background = Color.green.alpha = 0.1;
+var colCount = 0;
+var rowCount = 0;
 
+~synthWindows.do {|w|
+	w.close;
+};
+
+~synthWindows = [];
 
 ~synths.do { |synth, i|
 	var startButton, posControl, levelControl, speedControl, cutoffControl, label;
 	var balanceControl, ampControl;
 	var id, cmdPeriodFunc;
+	// Window.screenBounds.height/1.4
+	var width = 440;
+	var height = 250;
+	var left = 0;
+	var top = Window.screenBounds.height;
+	var w;
+
+	if (i % 3 == 0) {
+		if (i > 0) {
+			colCount = colCount + 1;
+			rowCount = 0
+		};
+	};
+
+	if (i % 3 >  0) {
+		rowCount = rowCount + 1;
+	};
+
+	left = colCount * width;
+	top = Window.screenBounds.height - ((rowCount * height) + 75);
+
+	w = Window(synth[\vals][\name].toUpper, Rect(left, top, width, height));
+	w.front;
+	w.view.decorator = FlowLayout(w.view.bounds);
+	w.view.background = Color.grey.alpha = 0.1;
 
 	'---------------------------------------'.postln;
 	'nodeID = '.post; synth[\sig].nodeID.postln;
 	synth.postln;
+	// [(i % 3), colCount, rowCount, top, left].postln;
 	'---------------------------------------'.postln;
 
 	// id = s.nextNodeID; // generate a note id.
@@ -119,6 +147,9 @@ w.view.background = Color.grey.alpha = 0.1;
 		CmdPeriod.remove(cmdPeriodFunc);
 	};
 
+	~synthWindows = ~synthWindows.add(w);
+
 };
 
 )
+
