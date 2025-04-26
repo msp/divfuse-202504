@@ -34,10 +34,32 @@ Buffer.freeAll;
 
 ~oscClient = NetAddr.new("127.0.0.1", 1234);
 ~samples = Array.new;
+~testSamples = Array.new;
 ~synths = Array.new;
 // ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/vowelsfemale*";
 // ~sampleDir = "/data/Dropbox-spatial/Dropbox/spatial/music/AudioSources/divfuse-202504/halfmastv4*";
 ~sampleDir = "/Users/spatial/Documents/music-icld/music-2025/Samples/divfuse-2504/halfmastv6trim*";
+~testSampleDir = "/Users/spatial/Documents/music-icld/music-2025/Samples/divfuse-2504/numbers*";
+
+"\n".postln;
+"----------------------------------------------".postln;
+"Loading Test Samples -------------------------".postln;
+"----------------------------------------------".postln;
+"\n".postln;
+
+PathName(~testSampleDir).files.do { |file, i|
+	("...found: " ++ file.fullPath).postln;
+    if(file.extension == "wav") {
+        var buf = Buffer.readChannel(s, file.fullPath, channels: [0]);  // mono
+		Buffer.read(s, file.fullPath);
+		~testSamples = ~testSamples.add(buf);
+        ("......loaded: " ++ file.fileName).postln;
+    }
+};
+
+"----------------------------------------------".postln;
+("| Total test samples loaded: " ++ ~testSamples.size).postln;
+"----------------------------------------------".postln;
 
 "\n".postln;
 "----------------------------------------------".postln;
@@ -57,7 +79,7 @@ PathName(~sampleDir).files.do { |file, i|
 };
 
 "----------------------------------------------".postln;
-("| Total loaded: " ++ ~samples.size).postln;
+("| Total project samples loaded: " ++ ~samples.size).postln;
 "----------------------------------------------".postln;
 
 "\n".postln;
