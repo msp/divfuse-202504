@@ -64,6 +64,10 @@ w.view.background = Color.grey.alpha = 0.1;
 	posControl = EZSlider(w, 400 @ 24, "Pan Pos", ControlSpec(0.1, 4.0),
 		{|ez| s.sendMsg("/n_set", id, "pos", ez.value); }, synth[\vals][\pos]);
 
+	w.view.decorator.nextLine;
+	posControl = EZSlider(w, 400 @ 24, "Width", ControlSpec(1, 4),
+		{|ez| s.sendMsg("/n_set", id, "width", ez.value); }, synth[\vals][\width]);
+
 	if (synth[\vals][\speed] > 0) {
 		w.view.decorator.nextLine;
 		speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 4.0),

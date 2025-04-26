@@ -15,6 +15,7 @@
 // 10> Dictionary[ (sig -> Synth('temp__117' : 1282)), (vals -> Dictionary[ (amp -> 0.19814238548279), (pos -> 0.5), (freq -> 740), (speed -> 0.1), (width -> 3) ]) ]
 (
 var vals = Array.new;
+var synthAmp = 0.4;
 
 vals = vals.add(Dictionary[
 	\name -> "voice1".asSymbol,
@@ -24,8 +25,8 @@ vals = vals.add(Dictionary[
 	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
 	// \width -> rrand(0.1, 4)
 	\freq -> 92,
-	\amp -> rrand(0.1, 0.3),
-	// \amp -> 0.15,
+	// \amp -> rrand(0.1, 0.3),
+	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.6,
@@ -36,10 +37,22 @@ vals = vals.add(Dictionary[
 ]);
 
 vals = vals.add(Dictionary[
+	\name -> "voice1b".asSymbol,
+	\level -> 0.5,
+	\freq -> 46,
+	\amp -> synthAmp,
+	\cutoff -> 20000,
+	\res -> 1.0,
+	\pos -> 0.61,
+	\width -> 1,
+	\speed -> 0.0,
+]);
+
+vals = vals.add(Dictionary[
 	\name -> "voice2".asSymbol,
 	\level -> 0.3,
 	\freq -> 233,
-	\amp -> rrand(0.1, 0.3),
+	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.3,
@@ -51,7 +64,7 @@ vals = vals.add(Dictionary[
 	\name -> "voice3".asSymbol,
 	\level -> 0.3,
 	\freq -> 415,
-	\amp -> rrand(0.1, 0.3),
+	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.3,
@@ -63,7 +76,7 @@ vals = vals.add(Dictionary[
 	\name -> "voice4".asSymbol,
 	\level -> 0.3,
 	\freq -> 740,
-	\amp -> rrand(0.1, 0.3),
+	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.5,
@@ -145,6 +158,8 @@ vals.do { |val, i|
 			"pos", val[\pos],
 			"speed", val[\speed],
 			"width", val[\width],
+			"cutoff", val[\cutoff],
+			"res", val[\res],
 		]
 	).run(false);
 
@@ -152,6 +167,39 @@ vals.do { |val, i|
 
 };
 ~synths.size.postln;
+
+/*{
+	PanAz.ar(
+		numChans: 6,
+		// in: SinOsc.ar(rrand(50, 120), 0.0, 0.4),
+		in: SinOsc.ar(freq: 80, phase: 0.0, mul: 0.5),
+		// in: ClipNoise.ar(0.05),
+		/*		in: RLPF.ar
+		(
+		in: LFPulse.ar
+		(
+		// SinOsc.kr(0.2, 0, 10, 21),
+		15,
+		0.1,
+		0.1,
+		),
+		freq: 100,
+		rq: 0.1,
+		mul: 0.6
+		).clip2(0.4),*/
+		pos: LFSaw.kr(
+			freq: 0.6,
+			iphase: LFTri.kr(
+				freq: 0.03,
+				mul: 1,
+				add: 1
+			)
+		),
+		level: 0.4,
+		width: 2,
+		orientation: 0.5
+	);
+}.play*/
 )
 
 
