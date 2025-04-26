@@ -98,7 +98,7 @@ var rowCount = 0;
 
 	if (synth[\vals][\speed] > 0) {
 		w.view.decorator.nextLine;
-		speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 4.0),
+		speedControl = EZSlider(w, 400 @ 24, "Amp LFO", ControlSpec(0.1, 36.0),
 			{|ez| s.sendMsg("/n_set", id, "speed", ez.value); }, synth[\vals][\speed]);
 	};
 

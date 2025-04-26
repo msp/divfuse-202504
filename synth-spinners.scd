@@ -84,6 +84,18 @@ vals = vals.add(Dictionary[
 	\speed -> 0.1,
 ]);
 
+vals = vals.add(Dictionary[
+	\name -> "voice5".asSymbol,
+	\level -> 0.3,
+	\freq -> 350,
+	\amp -> synthAmp,
+	\cutoff -> 20000,
+	\res -> 1.0,
+	\pos -> 0.2,
+	\width -> 3,
+	\speed -> 8,
+]);
+
 ~synths = [];
 ~synths.size.postln;
 
