@@ -26,7 +26,7 @@ var rowCount = 0;
 ~synthWindows = [];
 
 ~synths.do { |synth, i|
-	var startButton, posControl, levelControl, speedControl, cutoffControl, label;
+	var startButton, posControl, levelControl, speedControl, cutoffControl, noteControl, label;
 	var balanceControl, ampControl;
 	var id, cmdPeriodFunc;
 	// Window.screenBounds.height/1.4
@@ -79,6 +79,10 @@ var rowCount = 0;
 	w.view.decorator.nextLine;
 	levelControl = EZSlider(w, 400 @ 24, "Level", \db,
 		{|ez| s.sendMsg("/n_set", id, "level", ez.value.dbamp); }, synth[\vals][\level].ampdb);
+
+	// w.view.decorator.nextLine;
+	// noteControl = EZSlider(w, 400 @ 24, "Note", ControlSpec(0, 127, \lin, 1),
+	// {|ez| s.sendMsg("/n_set", id, "note", ez.value); }, synth[\vals][\note]);
 
 	w.view.decorator.nextLine;
 	cutoffControl = EZSlider(w, 400 @ 24, "Cutoff", ControlSpec(50, 20000, \exp),

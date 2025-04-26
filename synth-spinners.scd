@@ -24,7 +24,8 @@ vals = vals.add(Dictionary[
 	// \amp -> rrand(0.1, 0.3),
 	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
 	// \width -> rrand(0.1, 4)
-	\freq -> 92,
+	// \freq -> 92,
+	\note -> 42,
 	// \amp -> rrand(0.1, 0.3),
 	\amp -> synthAmp,
 	\cutoff -> 20000,
@@ -39,7 +40,8 @@ vals = vals.add(Dictionary[
 vals = vals.add(Dictionary[
 	\name -> "voice1b".asSymbol,
 	\level -> 0.5,
-	\freq -> 46,
+	// \freq -> 46,
+	\note -> 37,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
@@ -51,7 +53,8 @@ vals = vals.add(Dictionary[
 vals = vals.add(Dictionary[
 	\name -> "voice2".asSymbol,
 	\level -> 0.3,
-	\freq -> 233,
+	// \freq -> 233,
+	\note -> 52,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
@@ -63,7 +66,8 @@ vals = vals.add(Dictionary[
 vals = vals.add(Dictionary[
 	\name -> "voice3".asSymbol,
 	\level -> 0.3,
-	\freq -> 415,
+	// \freq -> 415,
+	\note -> 56,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
@@ -75,7 +79,8 @@ vals = vals.add(Dictionary[
 vals = vals.add(Dictionary[
 	\name -> "voice4".asSymbol,
 	\level -> 0.3,
-	\freq -> 740,
+	// \freq -> 740,
+	\note -> 75,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
@@ -87,7 +92,8 @@ vals = vals.add(Dictionary[
 vals = vals.add(Dictionary[
 	\name -> "voice5".asSymbol,
 	\level -> 0.3,
-	\freq -> 350,
+	// \freq -> 350,
+	\note -> 61,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
@@ -111,7 +117,7 @@ vals.do { |val, i|
 
 	SynthDef(val[\name],
 		{
-			arg out=0, amp=0.3, freq=100, level=0.3, pos=0.5, speed=0.1, width=1, cutoff=440, res=0.01;
+			arg out=0, amp=0.3, freq=100, level=0.3, pos=0.5, speed=0.1, width=1, cutoff=440, res=0.01, note=60;
 			var sigAmp, ampLFO;
 
 			ampLFO = LFTri.kr(
@@ -129,7 +135,8 @@ vals.do { |val, i|
 					numChans: 6,
 					in: RLPF.ar(
 						in: Saw.ar(
-							freq: freq,
+							// freq: freq,
+							freq: note.midicps,
 							mul: sigAmp
 						),
 						freq: cutoff,
@@ -166,7 +173,8 @@ vals.do { |val, i|
 	synth[\sig] = Synth(val[\name],
 		[
 			"amp", val[\amp],
-			"freq", val[\freq],
+			// "freq", val[\freq],
+			"note", val[\note],
 			"pos", val[\pos],
 			"speed", val[\speed],
 			"width", val[\width],
