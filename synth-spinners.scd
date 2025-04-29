@@ -162,6 +162,8 @@ vals.do { |val, i|
 			);
 	}).add;
 
+	// s.sync;
+
 	/*
 	"amp = \t".post; amp.postln;
 	"freq = \t".post; freq.postln;
@@ -234,7 +236,7 @@ vals.do { |val, i|
 
 
 // force a release
-~synths[1][\sig].release(3);
+~synths[0][\sig].release(3);
 // and then clear
 ~synths[1].clear;
 // FADER
@@ -245,7 +247,9 @@ vals.do { |val, i|
 
 ~synths[0][\sig].nodeID
 
-~synths[0][\sig]
+~synths[0][\sig].run(true)
+
+~synths[0][\sig].run(false)
 
 s.sendMsg("/n_free", ~synths[0][\sig].nodeID);
 
