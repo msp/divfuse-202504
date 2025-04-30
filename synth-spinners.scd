@@ -106,6 +106,8 @@ vals = vals.add(Dictionary[
 ~synths.size.postln;
 
 vals.do { |val, i|
+
+	fork {
 	var synth = Dictionary[
 		\vals -> nil,
 		\sig -> nil
@@ -162,7 +164,7 @@ vals.do { |val, i|
 			);
 	}).add;
 
-	// s.sync;
+	s.sync;
 
 	/*
 	"amp = \t".post; amp.postln;
@@ -186,9 +188,10 @@ vals.do { |val, i|
 	).run(false);
 
 	~synths = ~synths.add(synth);
+	~synths.size.postln;
+	};
 
 };
-~synths.size.postln;
 
 /*{
 	PanAz.ar(
