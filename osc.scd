@@ -5,8 +5,8 @@ OSCdef.new(
 	\s1Start,
 	{
 		arg msg, time, addr, port;
-		// [msg, time, addr, port].postln;
 		var value = msg[1];
+		[msg, time, addr, port].postln;
 		[msg[0], value].postln;
 		if (value == 1.0,
 			{ ~synths[0][\sig].run(true) },

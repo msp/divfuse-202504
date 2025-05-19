@@ -104,6 +104,19 @@ vals = vals.add(Dictionary[
 
 ~synths = [];
 ~synths.size.postln;
+~specs = ();
+
+// these must match the label scales in TouchOSC!
+~specs.put(\level,  ControlSpec(0, 1));
+~specs.put(\note, ControlSpec.specs[\midinote]);
+~specs.put(\amp, ControlSpec(0, 1));
+~specs.put(\cutoff, ControlSpec.specs[\freq]);
+~specs.put(\res, ControlSpec.specs[\rq]); //(change UI label 0..2)
+~specs.put(\pos, ControlSpec(0.1, 4));
+~specs.put(\width, ControlSpec(1, 4));
+~specs.put(\speed, ControlSpec(0.1, 36.0));
+
+~specs.keys.do { |key, val| [key, ~specs[key] ].postln };
 
 vals.do { |val, i|
 
