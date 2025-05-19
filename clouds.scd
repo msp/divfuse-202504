@@ -1,4 +1,6 @@
-
+////////////////////////////////////////////////////////////////////////////////
+// (.) CLOUDS
+////////////////////////////////////////////////////////////////////////////////
 
 (  // basic granulation
 {
@@ -46,7 +48,7 @@
 
 
 (
-SynthDef(\scratch,
+SynthDef(\clouds,
 	{
 		arg bufnum=0, pit=1, tex=0.5, freeze=0, mode=0, drywet=0.5, in_gain=1, rvb=0, fb=0;
 		var input = PlayBuf.ar(1, bufnum, 1, loop: 1)!2;
@@ -75,7 +77,7 @@ SynthDef(\scratch,
 }).add;
 )
 
-x = Synth(\scratch, [\bufnum: ~samples[2].bufnum])
+x = Synth(\clouds, [\bufnum: ~samples[2].bufnum])
 
 x.set(\freeze, 1)
 x.set(\freeze, 0)
@@ -84,19 +86,19 @@ x.set(\in_gain, 1.5)
 
 x.set(\mode, 0)
 
-x.set(\drywet, 0.1)
+x.set(\drywet, 0.8)
 
 x.set(\pit, 1)
 
-x.set(\tex, 0.8)
+x.set(\tex, 0.9)
 
-x.set(\rvb, 0.5)
+x.set(\rvb, 0.3)
 
-x.set(\fb, 0)
+x.set(\fb, 0.5)
 
 x.free
 
-y = Synth(\scratch, [\bufnum: ~samples[3].bufnum])
+y = Synth(\clouds, [\bufnum: ~samples[3].bufnum])
 
 y.set(\mode, 0)
 
@@ -115,7 +117,7 @@ y.set(\fb, 0)
 y.free
 
 
-z = Synth(\scratch, [\bufnum: ~samples[1].bufnum])
+z = Synth(\clouds, [\bufnum: ~samples[1].bufnum])
 
 z.set(\in_gain, 0.6)
 
@@ -132,9 +134,109 @@ z.set(\fb, 0.7)
 z.free
 
 
+////////////////////////////////////////////////////////////////////////////////
+// (.) PLAITS
+////////////////////////////////////////////////////////////////////////////////
+
+(
+{
+	// var trigger = Dust.kr( LFNoise2.kr(0.1).range(0.1, 7) );
+	// var trigger = Dust.kr( 4 );
+	var trigger = Impulse.ar(8);
+	var harmonics = SinOsc.kr(0.03, 0, 0.5, 0.5).range(0.0, 1.0);
+	// var harmonics = 0.5;
+	// var timbre = LFTri.kr(0.07, 0, 0.5, 0.5).range(0.0, 1.0);
+	var timbre = MouseY.kr(0,1);
+	// var morph = LFTri.kr(0.11, 0, 0.5, 0.5).squared;
+    var morph = MouseX.kr(0,1);
+	// var pitch = TIRand.kr(24, 48, trigger);
+	// var pitch = TIRand.kr(24, 26, trigger);
+	// var pitch = TWChoose.kr(trigger, [24, 28], [0.8, 0.2].normalizeSum);
+	var pitch = 30;
+	// var engine = TRand.kr(0, 15, trig: trigger).round;
+	var engine = 3;
+	// var sub = SinOsc.ar(pitch.midicps, 0, 0.1);
+    var sub = SinOsc.ar(55, 0, 0.3);
+	// var env = EnvGen.kr(
+	// 	Env.perc, doneAction: Done.freeSelf
+	// );
+
+    var mi = MiPlaits.ar(
+		pitch: pitch,
+		engine: engine,
+		harm: harmonics,
+		timbre: timbre,
+		morph: morph,
+        trigger: trigger,
+		decay: 0.4,
+		lpg_colour: 0.2,
+		mul: 0.5
+	);
+	// mi + (sub)
+	mi
+}.play
+)
 
 
+(   // some chords + trigger + level
+{
+    var harm = MouseY.kr(0,1);  // select chord
+    var timbre = 0.5;
+    var morph = 0.5;
+    var trigger = Impulse.kr(8);
+	// var lev = TRand.kr(trig: trigger);
+	var lev = 0;
+    var out = MiPlaits.ar(
+		40,
+		6,
+		harm,
+		timbre,
+		morph,
+		trigger,
+		// level: lev.squared,
+		level: lev,
+        decay: 0.3, timb_mod: 0.4, mul: 0.5);
+	// out[0] ! 2
+    //out.sum ! 2
+	out
+}.play
+)
 
+
+(
+SynthDef(\plaits,
+	{
+		arg pitch=40, engine=6, harm=0.1, timbre=0.5, morph=0.5, level=1.0, decay=0.5, mul=0.5;
+
+		// var harm = MouseY.kr(0,1);  // select chord
+		var trigger = Impulse.kr(2);
+
+		var sig = MiPlaits.ar(
+			pitch: pitch,
+			engine: engine,
+			harm: harm,
+			timbre: timbre,
+			morph: morph,
+			// trigger: trigger,
+			// level: level,
+			decay: decay,
+			timb_mod: 0.4,
+			mul: mul
+		);
+		Out.ar(0, sig);
+}).add;
+)
+
+
+a = Synth(\plaits, [])
+
+a.run(true)
+
+a.run(false)
+
+a.set(\pitch, 60)
+
+a.set(\engine, 6)
 
 
 

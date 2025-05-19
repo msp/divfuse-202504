@@ -50,4 +50,66 @@ OSCdef.new(
 	, '/synth1/width'
 );
 
+////////////////////////////////////////////////////////////////////////////////
+// (.) PLAITS
+////////////////////////////////////////////////////////////////////////////////
+
+
+OSCdef.new(
+	\plaitsFrequency,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		[msg[0], value].postln;
+		a.set(\width, value);
+	}
+	, '/plaits1/frequency'
+);
+
+OSCdef.new(
+	\plaitsHarmonics,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		[msg[0], value].postln;
+		a.set(\harm, value);
+	}
+	, '/plaits1/harmonics'
+);
+
+OSCdef.new(
+	\plaitsTimbre,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		[msg[0], value].postln;
+		a.set(\timbre, value);
+	}
+	, '/plaits1/timbre'
+);
+
+OSCdef.new(
+	\plaitsMorph,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		[msg[0], value].postln;
+		a.set(\morph, value);
+	}
+	, '/plaits1/morph'
+);
+
+
+OSCdef.new(
+	\plaitsDecay,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		[msg[0], value].postln;
+		a.set(\decay, value);
+	}
+	, '/plaits1/decay'
+);
+
+
 )
