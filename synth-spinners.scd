@@ -19,87 +19,88 @@ var synthAmp = 0.4;
 
 vals = vals.add(Dictionary[
 	\name -> "voice1".asSymbol,
-	\level -> 0.5,
+	\level -> 0.64,
 	// \freq -> rrand(50, 120),
 	// \amp -> rrand(0.1, 0.3),
 	// \pos -> [3, 1, 1/3, 1/5, 1/7].choose,
 	// \width -> rrand(0.1, 4)
 	// \freq -> 92,
-	\note -> 42,
+	// \note -> 42,
+	\note -> 44,
 	// \amp -> rrand(0.1, 0.3),
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
-	\pos -> 0.6,
+	\pos -> 0.2,
 	// \width -> rrand(3, 4),
 	// \width -> rrand(0.5, 1.5),
-	\width -> 3,
+	\width -> 1.39,
 	\speed -> 0.0,
 ]);
 
 vals = vals.add(Dictionary[
 	\name -> "voice1b".asSymbol,
-	\level -> 0.5,
+	\level -> 0.42,
 	// \freq -> 46,
 	\note -> 37,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
-	\pos -> 0.61,
-	\width -> 1,
+	\pos -> 0.31,
+	\width -> 1.96,
 	\speed -> 0.0,
 ]);
 
 vals = vals.add(Dictionary[
 	\name -> "voice2".asSymbol,
-	\level -> 0.3,
+	\level -> 0.14,
 	// \freq -> 233,
 	\note -> 52,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
-	\pos -> 0.3,
-	\width -> 3,
+	\pos -> 0.32,
+	\width -> 1.66,
 	\speed -> 0.0,
 ]);
 
 vals = vals.add(Dictionary[
 	\name -> "voice3".asSymbol,
-	\level -> 0.3,
+	\level -> 0.16,
 	// \freq -> 415,
 	\note -> 56,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.3,
-	\width -> 3,
-	\speed -> 0.1,
+	\width -> 2.85,
+	\speed -> 0.6,
 ]);
 
 vals = vals.add(Dictionary[
 	\name -> "voice4".asSymbol,
-	\level -> 0.3,
+	\level -> 0.15,
 	// \freq -> 740,
-	\note -> 75,
+	\note -> 78,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
 	\pos -> 0.5,
-	\width -> 3,
-	\speed -> 0.1,
+	\width -> 2.34,
+	\speed -> 0.8,
 ]);
 
 vals = vals.add(Dictionary[
 	\name -> "voice5".asSymbol,
-	\level -> 0.3,
+	\level -> 0.09,
 	// \freq -> 350,
 	\note -> 61,
 	\amp -> synthAmp,
 	\cutoff -> 20000,
 	\res -> 1.0,
-	\pos -> 0.2,
+	\pos -> 0.16,
 	\width -> 3,
-	\speed -> 8,
+	\speed -> 1,
 ]);
 
 ~synths = [];
@@ -257,7 +258,23 @@ vals.do { |val, i|
 ~synths[1].clear;
 // FADER
 
-~synths[0][\sig].set(\level, 0.0);
+// MSP
+~synths[0][\sig].set(\note, 44 );
+
+// MUCH
+~synths[0][\sig].set(\note, 42);
+
+// MSP
+~synths[1][\sig].set(\note, 32);
+
+// MUCH
+~synths[1][\sig].set(\note, 37);
+
+
+~synths[4][\sig].set(\note, 78);
+
+
+~synths[5][\sig].set(\note, 61);
 
 ~synths[0][\sig].set(\pos, 1.5);
 
