@@ -23,7 +23,7 @@ SynthDef(\samplePlayer, {
 
 SynthDef(\panningSamplePlayer, {
     |out=0, bufnum=0, amp=1, rate=1, startPos=0, panDur=5,
-     atk=0.01, rel=0.1, gate=1|
+     atk=0.01, rel=0.1, gate=1, volume=0.7|
 
     var sig, env, pan;
 
@@ -42,7 +42,7 @@ SynthDef(\panningSamplePlayer, {
         doneAction: 0
     );
 
-    sig = sig * env * amp;
+    sig = sig * env * amp * volume;
 	sig = Pan2.ar(sig, pan);
 	// Pan4.ar
     Out.ar(out, sig);

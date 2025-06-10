@@ -1,6 +1,9 @@
 (
 OSCdef.freeAll;
 
+////////////////////////////////////////////////////////////////////////////////
+// (.) SAWS
+////////////////////////////////////////////////////////////////////////////////
 ~synths.do { arg synth, i;
 	var action = "start";
 	var synthName = synth[\vals][\name];
@@ -26,72 +29,72 @@ OSCdef.freeAll;
 		,oscPattern
 	);
 
-	action = "level";
-	defName = (synthName ++ action ).asSymbol;
-	oscPattern = "/" ++ synthName ++ "/" ++ action;
-	[defName, oscPattern].postln;
+	["level", "pos", "width", "speed"].do {|key|
+		var defName = (synthName ++ key ).asSymbol;
+		var oscPattern = "/" ++ synthName ++ "/" ++ key;
+
+		[defName, oscPattern].postln;
+
+		OSCdef.new(
+			defName,
+			{
+				arg msg, time, addr, port;
+				var value = msg[1];
+				[msg[0], value, key].postln;
+				synth[\sig].set(key.asSymbol, value);
+			}
+			, oscPattern
+		);
+	};
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// (.) VOX
+////////////////////////////////////////////////////////////////////////////////
+
+(1..14).do { |i|
+	var action = "start";
+	var defName = ("vox" ++ i ++ action ).asSymbol;
+	var oscPattern = "/vox/" ++ i ++ "/" ++ action;
+	var pdefIndex = i - 1;
+
+	[i, defName, oscPattern].postln;
+
 	OSCdef.new(
 		defName,
 		{
 			arg msg, time, addr, port;
 			var value = msg[1];
-			[msg[0], value, action].postln;
-			synth[\sig].set(action.asSymbol, value);
+			// [msg, time, addr, port].postln;
+			[msg[0], value].postln;
+			if (value == 1.0,
+				{ Pdef(~pdefNames[pdefIndex]).play },
+				{ Pdef(~pdefNames[pdefIndex]).stop }
+			);
+
 		}
 		,oscPattern
 	);
 
-	action = "pos";
-	defName = (synthName ++ action ).asSymbol;
-	oscPattern = "/" ++ synthName ++ "/" ++ action;
-	[defName, oscPattern].postln;
-	OSCdef.new(
-		defName,
-		{
-			arg msg, time, addr, port;
-			// var value = msg[1].linlin(0.0, 1.0, 0.0, 4.0);
-			var value = msg[1];
-			[msg[0], value, action].postln;
-			synth[\sig].set(action.asSymbol, value);
-		}
-		,oscPattern
-	);
+	action = "volume";
+	defName = ("vox" ++ i ++ action ).asSymbol;
+	oscPattern = "/vox/" ++ i ++ "/" ++ action;
 
-	action = "width";
-	defName = (synthName ++ action ).asSymbol;
-	oscPattern = "/" ++ synthName ++ "/" ++ action;
-	[defName, oscPattern].postln;
+	[i, defName, oscPattern].postln;
+
 	OSCdef.new(
 		defName,
 		{
 			arg msg, time, addr, port;
-			// var value = msg[1].linlin(0.0, 1.0, 0.0, 4.0);
 			var value = msg[1];
 			[msg[0], value].postln;
-			synth[\sig].set(action.asSymbol, value);
+
+			Pdef(~pdefNames[pdefIndex]).set(\volume, value);
 		}
 		,oscPattern
 	);
 
 };
-// ["engine", "harm", "timbre", "morph", "decay", "speed", "fm_mod", "timb_mod", "morph_mod"].do {|key|
-// 	var name = ("plaits" ++ key).asSymbol;
-// 	("Creating OSCdef: "++ name).postln;
-//
-// 	OSCdef.new(
-// 		name,
-// 		{
-// 			arg msg, time, addr, port;
-// 			var value = msg[1];
-// 			msg.postln;
-// 			~plaits.set(key.asSymbol, value);
-// 		}
-// 		, "/plaits1/" ++ key
-// 	);
-// };
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // (.) PLAITS
@@ -153,6 +156,10 @@ OSCdef.new(
 	}
 	, '/plaits1/decay'
 );
+
+/*OSCdef.all.do { |o|
+	o.postln;
+}*/
 
 
 )

@@ -3,13 +3,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 (
 var centerBase, centerRange, speed, stepSize, lowerBound, upperBound;
-var window, envViews, v, h, durations, thisBuf;
+var window, envViews, v, h, durations, thisBuf, thisPdef;
 
 ~numVoices = ~samples.size -1;
 ~voices = Dictionary.new;
+~pdefNames = Array.new;
 ~namer = { |buf, index|
 	var fileName = PathName(buf.path).fileName;
-	((index+1).asString.padLeft(2, "0") ++ "- "++fileName).asSymbol;
+	var name = ((index+1).asString.padLeft(2, "0") ++ "- "++fileName).asSymbol;
+	("namer: " ++ name).postln;
+	~pdefNames = ~pdefNames.add(name);
+	name;
 };
 
 ~lfo1 = { | index, min, max, cycles|
@@ -51,8 +55,9 @@ upperBound = 5.0;
 
 // Voice 1 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[8];
+thisPdef = ~namer.(thisBuf, 0);
 
-Pdef(~namer.(thisBuf, 0),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -68,8 +73,9 @@ Pdef(~namer.(thisBuf, 0),
 
 // Voice 2 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[9];
+thisPdef = ~namer.(thisBuf, 1);
 
-Pdef(~namer.(thisBuf, 1),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -85,8 +91,9 @@ Pdef(~namer.(thisBuf, 1),
 
 // Voice 3 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[10];
+thisPdef = ~namer.(thisBuf, 2);
 
-Pdef(~namer.(thisBuf, 2),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -102,8 +109,9 @@ Pdef(~namer.(thisBuf, 2),
 
 // Voice 4 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[14];
+thisPdef = ~namer.(thisBuf, 3);
 
-Pdef(~namer.(thisBuf, 3),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -119,8 +127,9 @@ Pdef(~namer.(thisBuf, 3),
 
 // Voice 5 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[15];
+thisPdef = ~namer.(thisBuf, 4);
 
-Pdef(~namer.(thisBuf, 4),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, Pseq([thisBuf.bufnum, ~samples[19]], inf),
@@ -138,8 +147,9 @@ Pdef(~namer.(thisBuf, 4),
 
 // Voice 6 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[16];
+thisPdef = ~namer.(thisBuf, 5);
 
-Pdef(~namer.(thisBuf, 5),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -157,8 +167,9 @@ Pdef(~namer.(thisBuf, 5),
 
 // Voice 7 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[17];
+thisPdef = ~namer.(thisBuf, 6);
 
-Pdef(~namer.(thisBuf, 6),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -176,8 +187,9 @@ Pdef(~namer.(thisBuf, 6),
 
 // Voice 8 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[11];
+thisPdef = ~namer.(thisBuf, 7);
 
-Pdef(~namer.(thisBuf, 7),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -193,8 +205,9 @@ Pdef(~namer.(thisBuf, 7),
 
 // Voice 9 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[12];
+thisPdef = ~namer.(thisBuf, 8);
 
-Pdef(~namer.(thisBuf, 8),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -211,8 +224,9 @@ Pdef(~namer.(thisBuf, 8),
 
 // Voice 10 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[13];
+thisPdef = ~namer.(thisBuf, 9);
 
-Pdef(~namer.(thisBuf, 9),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -232,8 +246,9 @@ Pdef(~namer.(thisBuf, 9),
 // Voice 11 ////////////////////////////////////////////////////////////////////
 // Manually start / stop
 thisBuf = ~samples[14];
+thisPdef = ~namer.(thisBuf, 10);
 
-Pdef(~namer.(thisBuf, 10),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -249,8 +264,9 @@ Pdef(~namer.(thisBuf, 10),
 
 // Voice 12 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[19];
+thisPdef = ~namer.(thisBuf, 11);
 
-Pdef(~namer.(thisBuf, 11),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -268,8 +284,9 @@ Pdef(~namer.(thisBuf, 11),
 
 // Voice 13 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[18];
+thisPdef = ~namer.(thisBuf, 12);
 
-Pdef(~namer.(thisBuf, 12),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
@@ -286,8 +303,9 @@ Pdef(~namer.(thisBuf, 12),
 
 // Voice 14 ////////////////////////////////////////////////////////////////////
 thisBuf = ~samples[19];
+thisPdef = ~namer.(thisBuf, 13);
 
-Pdef(~namer.(thisBuf, 13),
+Pdef(thisPdef,
 	Pbind(
 		\instrument, \panningSamplePlayer,
 		\bufnum, thisBuf.bufnum,
