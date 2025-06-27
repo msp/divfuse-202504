@@ -12,6 +12,8 @@
 }.play
 )
 
+~samples[1].path
+
 (  //
 {
     var imp = Dust.ar([0.8,1.1]);
@@ -34,11 +36,11 @@
     var frez = LFClipNoise.kr(0.3);
 
     MiClouds.ar(input, pit, pos, size, dens, tex,
-		drywet: 0.5,
+		drywet: 1.0,
 		// in_gain: 2,
 		rvb:0,
 		fb: 0,
-		freeze: 1,
+		freeze: 0,
 		// lofi: 0,
 		mode: 0
 	);
@@ -50,12 +52,12 @@
 (
 SynthDef(\clouds,
 	{
-		arg bufnum=0, pit=1, tex=0.5, freeze=0, mode=0, drywet=0.5, in_gain=1, rvb=0, fb=0;
+		arg bufnum=0, pit=1, tex=0.5, freeze=0, mode=0, drywet=0.5, in_gain=1, rvb=0, fb=0, dens=0.3, trig=0.0;
 		var input = PlayBuf.ar(1, bufnum, 1, loop: 1)!2;
 
 		var pos = MouseX.kr(0,1);
 		var size = MouseY.kr(0,1);
-		var dens = LFNoise1.kr(0.3,0.5,0.5);
+		// var dens = LFNoise1.kr(0.3,0.5,0.5);
 
 
 		Out.ar(0,
@@ -71,13 +73,14 @@ SynthDef(\clouds,
 				freeze: freeze,
 				rvb: rvb,
 				fb: fb,
-				mode: mode
+				mode: mode,
+				trig: trig
 			)
 		);
 }).add;
 )
 
-x = Synth(\clouds, [\bufnum: ~samples[2].bufnum])
+x = Synth(\clouds, [\bufnum: ~testSamples[0].bufnum])
 
 x.set(\freeze, 1)
 x.set(\freeze, 0)
@@ -86,15 +89,19 @@ x.set(\in_gain, 1.5)
 
 x.set(\mode, 0)
 
-x.set(\drywet, 0.8)
+x.set(\drywet, 1.0)
 
 x.set(\pit, 1)
 
-x.set(\tex, 0.9)
+x.set(\dens, 0.38)
 
-x.set(\rvb, 0.3)
+x.set(\tex, 0.1)
 
-x.set(\fb, 0.5)
+x.set(\rvb, 0)
+
+x.set(\fb, 0)
+
+x.set(\trig, 0.0)
 
 x.free
 
@@ -104,7 +111,7 @@ y.set(\mode, 0)
 
 y.set(\in_gain, 0.6)
 
-y.set(\drywet, 0.5)
+y.set(\drywet, 1.0)
 
 y.set(\pit, 1.0)
 
@@ -121,7 +128,7 @@ z = Synth(\clouds, [\bufnum: ~samples[1].bufnum])
 
 z.set(\in_gain, 0.6)
 
-z.set(\drywet, 0.5)
+z.set(\drywet, 1.0)
 
 z.set(\pit, 5)
 
@@ -132,6 +139,34 @@ z.set(\rvb, 0.6)
 z.set(\fb, 0.7)
 
 z.free
+
+
+// using external grain trigger (from docs)
+(
+a = {
+	arg freeze=0, speed=1, size=0.5, dens=0.5;
+    var input = PlayBuf.ar(1, b, 1, loop: 1)!2;
+
+	// var dens = 0.5;
+	// var trig = Dust.kr(10).poll;
+	var trig = Pulse.kr(speed);
+	var pos = MouseX.kr(0,1);
+	// var freeze = MouseY.kr(0,1);
+	// var size = 0.9;
+	var pitch = 1;
+
+    MiClouds.ar(input, pitch, pos, size, dens, 0.5, freeze: freeze, trig: trig, drywet: 1, mode: 0);
+
+}.play
+)
+
+a.set(\size, 0.2);
+
+a.set(\dens, 0.4);
+
+a.set(\speed, 1.0);
+
+a.set(\freeze, 1);
 
 
 ////////////////////////////////////////////////////////////////////////////////
