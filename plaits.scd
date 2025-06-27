@@ -64,7 +64,7 @@ d) samples and holds the value of the 'model' input
 */
 SynthDef(\plaits,
 	{
-		arg pitch=40, engine=6, harm=0.5, timbre=0.5, morph=0.5, speed=6, level=1.0, decay=0.5, fm_mod=0.0, timb_mod=0.0, morph_mod=0.0, lpg_colour=0.5, mul=0.5;
+		arg out=0, pitch=40, engine=6, harm=0.5, timbre=0.5, morph=0.5, speed=6, level=1.0, decay=0.5, fm_mod=0.0, timb_mod=0.0, morph_mod=0.0, lpg_colour=0.5, mul=0.5, gate=1.0;
 
 		/*
 		var trig = Select.kr(trigger, [
@@ -84,7 +84,8 @@ SynthDef(\plaits,
 			harm: harm,
 			timbre: l_timbre,
 			morph: l_morph,
-			trigger: Impulse.kr(speed),
+			trigger: gate,
+			// trigger: Impulse.kr(speed),
 			// level: level,
 			decay: decay,
 			fm_mod: fm_mod,
@@ -93,17 +94,21 @@ SynthDef(\plaits,
 			lpg_colour: lpg_colour,
 			mul: mul
 		);
-		Out.ar(0, sig);
+
+		var env = Linen.kr(gate, doneAction: Done.freeSelf);
+
+		Out.ar(out, sig * env);
 		// Out.ar(0, sig[0] ! 2);
 }).add;
 
+// s.sync;
 
-~plaits = Synth(\plaits, []).run(false);
+// ~plaits = Synth(\plaits, []).run(false);
 )
 
 // Control /////////////////////////////////////////////////////////////////////
 
-Synth(\plaits, [])
+~plaits = Synth(\plaits, [])
 
 ~plaits.run(true)
 
@@ -111,13 +116,76 @@ Synth(\plaits, [])
 
 ~plaits.set(\pitch, 40.99)
 
-~plaits.set(\engine, 0)
+~plaits.set(\engine, 2)
 
 ~plaits.set(\trigger, 0)
+~plaits.set(\trigger, 1)
 
 ~plaits.set(\speed, 2)
 
 ~plaits.set(\i_timbre, 0.9)
+
+Scale.bhairav.degrees.copyRange(0, 2).midicps
+
+~scale = Scale.bhairav.degrees.copyRange(0, 2);
+
+
+
+(
+~pitch = 23;
+
+x = Pbind(
+	\instrument, \plaits,
+	// \pitch, Pfunc({ Scale.bhairav.degrees.copyRange(0, 2).choose.midiratio }),
+	// \pitch, Pseq([40, 30], inf),
+	// \pitch, Pseq(~scale, inf) + 60,
+	\pitch, Pfunc { |event| ~pitch },
+
+	// \dur, Prand([1, 0.3, 0.2, 0.5]/3, inf),
+	// \dur, Pseq([0.2, 0.5]/2, inf),
+	\dur, Pseq(
+		[
+			1,
+			0.3,
+			Pseq([0.1, 0.2, 0.5]),
+			0.5
+	] / 3, inf),
+	\decay, Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8])], inf),
+	\harm, Pseq([0.5, 0.2, 0.1, 0.6], inf),
+	\timbre, Pseq([0.5, Pseq([0.6, 0.5, 0.95])], inf),
+	\morph, Pseq([0.5, Pseq([0.3, 1])], inf),
+	\lpg_colour, Pseq([0.1, 0.2, 0.4, 1], inf),
+	\engine, Pseq([
+		// Pseq([0,1]),
+		// 0,
+		Prand([0,1]),
+		Prand([2,11]),
+		// 3,
+		Pseq([6, 6, 6, 6, 6, 6, 12, 7]),
+
+	], inf),
+	// \panDur, 1,
+	// \atk, 0.1,
+	// \rel, 0.1,
+	// \amp, 0.2,
+	\out, Pseq(
+		[
+			0,1,2,3,4,5
+			// 3
+			// ~out1_2,
+			// ~out3_4,
+			// ~out1_2,
+			// ~out5_6,
+			// ~out2,
+			// ~out3,
+			// ~out4,
+
+	], inf),
+).play;
+)
+
+x.stop;
+
 
 
 
