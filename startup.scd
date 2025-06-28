@@ -40,6 +40,7 @@ s.options.device = "Fireface UCX (23733485)";  // must match a name from ServerO
 
 s.options.numOutputBusChannels = 8;     // or however many outputs you want
 s.options.numInputBusChannels = 0;      // if you don't need inputs
+s.options.recChannels = 8;
 
 s.waitForBoot {
 	"\nRunning MSP startup file >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>".postln;
