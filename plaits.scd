@@ -30,8 +30,9 @@ OSCdef.new(
 	{
 		arg msg, time, addr, port;
 		var value = msg[1];
-		msg.postln;
-		~plaits.set(\pitch, value);
+		msg.round(0.001).postln;
+		~pitch = value;
+		// ~plaits.set(\pitch, value);
 	}
 	, '/plaits1/frequency'
 );
@@ -41,7 +42,7 @@ OSCdef.new(
 	{
 		arg msg, time, addr, port;
 		var value = msg[1];
-		msg.postln;
+		msg.round(0.001).postln;
 		~harm = value;
 		// ~plaits.set(\pitch, value);
 	}
@@ -53,7 +54,7 @@ OSCdef.new(
 	{
 		arg msg, time, addr, port;
 		var value = msg[1];
-		msg.postln;
+		msg.round(0.001).postln;
 		~timbre = value;
 		// ~plaits.set(\pitch, value);
 	}
@@ -65,15 +66,26 @@ OSCdef.new(
 	{
 		arg msg, time, addr, port;
 		var value = msg[1];
-		msg.postln;
+		msg.round(0.001).postln;
 		~morph = value;
 		// ~plaits.set(\pitch, value);
 	}
 	, '/plaits1/morph'
 );
 
+OSCdef.new(
+	\plaitsTestDecay,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		msg.round(0.001).postln;
+		~decay = value;
+	}
+	, '/plaits1/decay'
+);
 
-["engine", "XXXharm", "XXtimbre", "XXmorph", "decay", "speed", "fm_mod", "timb_mod", "morph_mod"].do {|key|
+
+["engine", "XXXharm", "XXtimbre", "XXmorph", "XXdecay", "speed", "fm_mod", "timb_mod", "morph_mod"].do {|key|
 	var name = ("plaits" ++ key).asSymbol;
 	("Creating OSCdef: "++ name).postln;
 
@@ -140,39 +152,67 @@ SynthDef(\plaits,
 // s.sync;
 
 // ~plaits = Synth(\plaits, []).run(false);
-)
+// )
 
 // Control /////////////////////////////////////////////////////////////////////
 
-~plaits = Synth(\plaits, [])
-
-~plaits.run(true)
-
-~plaits.run(false)
-
-~plaits.set(\pitch, 40.99)
-
-~plaits.set(\engine, 2)
-
-~plaits.set(\trigger, 0)
-~plaits.set(\trigger, 1)
-
-~plaits.set(\speed, 2)
-
-~plaits.set(\i_timbre, 0.9)
-
-Scale.bhairav.degrees.copyRange(0, 2).midicps
-
-~scale = Scale.bhairav.degrees.copyRange(0, 2);
-
-~harm = 0.5;
+// ~plaits = Synth(\plaits, [])
+//
+// ~plaits.run(true)
+//
+// ~plaits.run(false)
+//
+// ~plaits.set(\pitch, 40.99)
+//
+// ~plaits.set(\engine, 2)
+//
+// ~plaits.set(\trigger, 0)
+// ~plaits.set(\trigger, 1)
+//
+// ~plaits.set(\speed, 2)
+//
+// ~plaits.set(\i_timbre, 0.9)
+//
+// Scale.bhairav.degrees.copyRange(0, 2).midicps
+//
+// ~scale = Scale.bhairav.degrees.copyRange(0, 2);
+//
+// ~harm = 0.5;
 
 // Sequence ////////////////////////////////////////////////////////////////////
-(
-// ~pitch = 23;
-// ~harm = 0.5;
-// ~timbre = 0.5;
-// ~morph = 0.5;
+// (
+~pitch = 51;
+~harm = 0.19;
+~timbre = 0.74;
+~morph = 0.07;
+~timbreSeq = Pseq([0.6, 0.5, 0.95], inf).asStream;
+~decaySeq = Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8] / 3)] / 1, inf).asStream;
+~morphSeq = Pseq([0.5, Pseq([0.3, 1])]/2, inf).asStream;
+~harmSeq = Pseq([0.5, 0.2, 0.1, 0.6]/1, inf).asStream;
+// chooses synthesis engine (0 -- 15): 0:virtual_analog_engine, 1:waveshaping_engine, 2:fm_engine, 3:grain_engine, 4:additive_engine, 5:wavetable_engine, 6:chord_engine, 7:speech_engine, 8:swarm_engine, 9:noise_engine, 10:particle_engine, 11:string_engine, 12:modal_engine, 13:bass_drum_engine, 14:snare_drum_engine, 15:hi_hat_engine
+//
+// The dominant Plaits engine
+~e = 11
+;
+
+~durDiv = [4, 2, 4, 2];
+
+~modulateBipolar = { |seqValue, uiValue|
+	var output = 0.5;
+
+    uiValue = uiValue.clip(0, 1);  // Optional safety clamp
+
+	if (uiValue <= 0.5) {
+        output = seqValue * (uiValue * 2)
+    } {
+        output = seqValue + (((uiValue - 0.5) * 2) * (1 - seqValue))
+    };
+
+	// ['modulateBipolar:', seqValue, uiValue.round(0.0001), output.round(0.0001)].postln;
+
+	output;
+
+};
 
 x = Pdef(\plaitsSequence,
 	Ppar([
@@ -182,20 +222,19 @@ x = Pdef(\plaitsSequence,
 			// \pitch, Pseq([40, 30], inf),
 			// \pitch, Pseq(~scale, inf) + 60,
 			\pitch, Pfunc { |event| ~pitch },
-
-			// \dur, Prand([1, 0.3, 0.2, 0.5]/3, inf),
-			// \dur, Pseq([0.2, 0.5, 0.5]/2, inf),
-			\dur, Pseq([
-				Pseq([0.2, 0.4, 0.8]),
-				0.2,
-				0.2,
-				0.2,
-				0.2,
-				0.2,
-				Pseq([0.8, 0.4, 0.2]),
-				0.2,
-				0.2
-			] / [2, 2, 2, 2, 2, 1], inf),
+			\dur, Prand([0.5, Rest(0.5), 0.5]/~durDiv, inf),
+			// \dur, Pseq([0.1, Rest(0.4), 0.2]/[0.5, 0.5, 1, 0.25], inf),
+			// \dur, Pseq([
+			// 	Pseq([0.2, 0.4, 0.8]),
+			// 	0.2,
+			// 	0.2,
+			// 	0.2,
+			// 	0.2,
+			// 	0.2,
+			// 	Pseq([0.8, 0.4, 0.2]),
+			// 	0.2,
+			// 	0.2
+			// ] / [0.5, 2, 1, 0.25, 2, 1], inf),
 			// \dur, Pseq(
 			// 	[
 			// 		1,
@@ -203,22 +242,36 @@ x = Pdef(\plaitsSequence,
 			// 		Pseq([0.1, 0.2, 0.5]),
 			// 		0.5
 			// ] / 3, inf),
-			// \decay, Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8])], inf),
-			// \harm, Pseq([0.5, 0.2, 0.1, 0.6], inf),
-			\harm, Pfunc { |event| ~harm },
-			\timbre, Pfunc { |event| ~timbre },
-			// \timbre, Pseq([0.5, Pseq([0.6, 0.5, 0.95])], inf),
-			// \morph, Pseq([0.5, Pseq([0.3, 1])], inf),
-			\morph, Pfunc { |event| ~morph },
+			// \decay, Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8] / 1.5)] / 1, inf),
+			\decay, Pfunc { |event|
+				~modulateBipolar.(~decaySeq.next, ~decay)
+			},
+			// \harm, Pseq([0.5, 0.2, 0.1, 0.6]/1, inf),
+			// \harm, Pfunc { |event| ~harm },
+			\harm, Pfunc { |event|
+				~modulateBipolar.(~harmSeq.next, ~harm)
+			},
+			\timbre, Pfunc { |event|
+				~modulateBipolar.(~timbreSeq.next, ~timbre)
+			},
+			// \timbre, Pfunc { |event| ~timbre },
+			// \timbre, Pseq([0.5, Pseq([0.6, 0.5, 0.95])]/1, inf),
+			// \morph, Pseq([0.5, Pseq([0.3, 1])]/2, inf),
+			// \morph, Pfunc { |event| ~morph },
+			\morph, Pfunc { |event|
+				~modulateBipolar.(~morphSeq.next, ~morph)
+			},
 			\lpg_colour, Pseq([0.1, 0.2, 0.4, 1], inf),
+			// \engine, Pseq([~e], inf),
 			\engine, Pseq([
 				Prand([0,1]),
 				Prand([2,11]),
 				// 3,
-				Pseq([6, 6, 6, 6, 6, 6, 12,
-					// 5
-					Pwrand([5, 6, 7, 11], [1, 1, 0.3, 1].normalizeSum)
-				]
+				Pseq([
+					~e, ~e-5, ~e, ~e-4, ~e, ~e, 1,
+					2
+					// Pwrand([5, ~e, 7, 11], [1, 1, 0.3, 1].normalizeSum)
+					]
 				),
 
 			], inf),
@@ -228,8 +281,8 @@ x = Pdef(\plaitsSequence,
 			// \amp, 0.2,
 			\out, Pseq(
 				[
-					// 0
-					0,1,2,3,4,5
+					0
+					// 0,1,2,3,4,5
 					// 3
 					// ~out1_2,
 					// ~out3_4,
@@ -244,27 +297,31 @@ x = Pdef(\plaitsSequence,
 		Pbind(
 			\instrument, \plaits,
 			// \dur, 0.2,
-			\dur, Pseq([
-				Pseq([0.2, 0.4, Rest(0.8)]),
-				0.2,
-				Rest(0.2),
-				0.2,
-				Rest(0.2),
-				0.2,
-				Pseq([0.8, 0.4, 0.2]),
-				0.2,
-				0.2
-			] / [2, 2, 2, 2, 2, 1], inf),
-			\pitch, 35,
-			\harm, 0.95,
-			\timbre, 0.3,
-			\morph, Pseq([0.3, 0.1, 0.1, 0.1, 0.4, 0.1, 0.1, 0.1, Pseq([0.5, 0.3, 0.1])], inf),
+			\dur, Prand([0.5, Rest(0.5), Rest(0.5), Rest(0.5)]/~durDiv, inf),
+			// \dur, Pseq([
+			// 	Pseq([0.2, 0.4, Rest(0.8)]),
+			// 	0.2,
+			// 	Rest(0.2),
+			// 	0.2,
+			// 	Rest(0.2),
+			// 	0.2,
+			// 	Pseq([0.8, 0.4, 0.2]),
+			// 	0.2,
+			// 	0.2
+			// ] / [0.5, 2, 2, 0.5, 2, 1], inf),
+			\pitch, 38,
+			\harm, 0.25,
+			\timbre, 0.2,
+			// \morph, 0.5,
+			\morph, Pseq(
+				[0.3, 0.1, 0.1, 0.1, 0.4, 0.1, 0.1, 0.1, Pseq([0.5, 0.3, 0.1])
+			], inf),
 			\engine, Pseq([13,13,13,13,13,13,13,13,14], inf),
 			// \engine, 14,
 			// \decay, 0.2,
-			\mul, 0.4,
-			// \out, 0
-			\out, Pseq([0,1,2,3,4,5], inf)
+			\mul, 0.6,
+			\out, 0
+			// \out, Pseq([0,1,2,3,4,5], inf)
 		)
 	])
 ).play;
@@ -277,7 +334,7 @@ x.stop;
 
 // Pseq([0.2, 0.5, 0.5]/2, inf)
 
-
+Quarks.gui
 
 // Help patch /////////////////////////////////////////////////////////////////////
 
