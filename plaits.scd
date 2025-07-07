@@ -4,14 +4,21 @@
 (
 // s.boot;
 
-~pitch = 51;
-~harm = 0.19;
-~timbre = 0.74;
-~morph = 0.07;
-~decay = 0.5;
+// ~pitch = 51;
+// ~harm = 0.19;
+// ~timbre = 0.74;
+// ~morph = 0.07;
+~pitch = 49;
+~harm = 0.48;
+~timbre = 0.44;
+~morph = 0.43;
+~decay = 0.59;
 ~speed = 1;
+~fmMod = 0.0;
+~lpgColour = 0.5;
 // The dominant Plaits engine
-~e = 0;
+~e = 6;
+~dur = 0.5;
 
 s.waitForBoot {}
 )
@@ -27,9 +34,13 @@ OSCdef.new(
 		arg msg, time, addr, port;
 		var value = msg[1];
 		msg.postln;
+		// if (value == 1.0,
+		// 	{ ~plaits.run(true) },
+		// 	{ ~plaits.run(false) }
+		// );
 		if (value == 1.0,
-			{ ~plaits.run(true) },
-			{ ~plaits.run(false) }
+			{ x.play },
+			{ x.stop }
 		);
 
 	}
@@ -112,13 +123,36 @@ OSCdef.new(
 		arg msg, time, addr, port;
 		var value = msg[1];
 		msg.round(0.001).postln;
-		~speed = value;
+		// ~speed = value;
+		~tempoClock.tempo = value/60;
 	}
 	, '/plaits1/speed'
 );
 
+OSCdef.new(
+	\plaitsTestFmMod,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		msg.round(0.001).postln;
+		~fmMod = value;
+	}
+	, '/plaits1/fm_mod'
+);
 
-["XXengine", "XXXharm", "XXtimbre", "XXmorph", "XXdecay", "XXspeed", "fm_mod", "timb_mod", "morph_mod"].do {|key|
+OSCdef.new(
+	\plaitsTestLpgColour,
+	{
+		arg msg, time, addr, port;
+		var value = msg[1];
+		msg.round(0.001).postln;
+		~lpgColour = value;
+	}
+	, '/plaits1/lpg_colour'
+);
+
+
+["XXengine", "XXXharm", "XXtimbre", "XXmorph", "XXdecay", "XXspeed", "XXfm_mod", "timb_mod", "morph_mod"].do {|key|
 	var name = ("plaits" ++ key).asSymbol;
 	("Creating OSCdef: "++ name).postln;
 
@@ -178,7 +212,22 @@ SynthDef(\plaits,
 
 		var env = Linen.kr(gate, doneAction: Done.freeSelf);
 
-		Out.ar(out, sig * env);
+		Out.ar(out,
+			// sig * env
+			MiVerb.ar(
+				sig * env,
+				time: 0.3,
+				drywet: 0.15,
+				damp: 0.8,
+				hp: 0.7,
+				// freeze: TRand.kr(-1, 1, Dust.kr(0.7)),
+				freeze: 0,
+				diff: 0.625,
+				mul: 1.0,
+				add: 0.0
+
+			);
+		);
 		// Out.ar(0, sig[0] ! 2);
 }).add;
 
@@ -214,35 +263,61 @@ SynthDef(\plaits,
 
 // Sequence ////////////////////////////////////////////////////////////////////
 // (
+~tempoClock = TempoClock.new(120/60);
 ~playCount = 0;
-// ~timbreSeq = Pseq([0.5], inf).asStream;
-~timbreSeq = Pseq([0.6, 0.5, 0.95], inf).asStream;
+~timbreSeq = Pseq([0.5], inf).asStream;
+// ~timbreSeq = Pseq([0.6, 0.5, 0.95], inf).asStream;
 // ~decaySeq = Pseq([0.5], inf).asStream;
-~decaySeq = Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8] / 3)] / 1, inf).asStream;
-~morphSeq = Pseq([0.5, Pseq([0.3, 1])]/2, inf).asStream;
+~decaySeq = Pseq([0.4, 0.2, Pseq([0.6, 0.1, 0.8] / 3)] / 6, inf).asStream;
+~morphSeq = Pseq([0.5], inf).asStream;
+// ~morphSeq = Pseq([0.5, Pseq([0.3, 1])]/2, inf).asStream;
+// ~harmSeq = Pseq([0.5], inf).asStream;
 ~harmSeq = Pseq([0.5, 0.2, 0.1, 0.6]/1, inf).asStream;
+~fmModSeq = Pseq([0.5], inf).asStream;
+~lpgColourSeq = Pseq([0.1, 0.2, 0.4, 1], inf);
+// ~lpgColourSeq = Pseq([0.5], inf);
 
 ~engines = (0..15);
 // chooses synthesis engine (0 -- 15): 0:virtual_analog_engine, 1:waveshaping_engine, 2:fm_engine, 3:grain_engine, 4:additive_engine, 5:wavetable_engine, 6:chord_engine, 7:speech_engine, 8:swarm_engine, 9:noise_engine, 10:particle_engine, 11:string_engine, 12:modal_engine, 13:bass_drum_engine, 14:snare_drum_engine, 15:hi_hat_engine
+// ~engineSeq = Pseq([
+// 	Prand([0,1]),
+// 	Prand([2,11]),
+// 	// 3,
+// 	Pseq([
+// 		"~e", "~e-5", "~e", "~e-4", "~e", "~e", 1,
+// 		2
+// 		// Pwrand([5, "~e", 7, 11], [1, 1, 0.3, 1].normalizeSum)
+// 	])
+// ], inf).asStream;
+
 ~engineSeq = Pseq([
 	Prand([0,1]),
 	Prand([2,11]),
 	// 3,
 	Pseq([
-		"~e", "~e-5", "~e", "~e-4", "~e", "~e", 1,
-		2
-		// Pwrand([5, ~e, 7, 11], [1, 1, 0.3, 1].normalizeSum)
+		// "~e", "~e-5", "~e", "~e-4", "~e", "~e", 1,
+		"~e", "~e", "~e-5", "~e", "~e+2", "~e", 0,
+		// 2
+		// Pwrand([5, "~e", 7, 11], [1, 1, 0.3, 1].normalizeSum)
 	])
 ], inf).asStream;
 
-~durationSeq = Prand([0.5, Rest(1.0), 0.5], inf).asStream;
+// ~durationSeq = Prand([0.5, Rest(1.0), 0.5], inf).asStream;
+~durationSeq = Pseq(
+	[
+		1.0,
+		0.5,
+		Prand([1.0, Rest(0.5)]),
+		Prand([0.5, Rest(1.0), Rest(1.5)]),
+		Pwrand([1.5, 1, 0.5], [0.2, 0.7, 0.6].normalizeSum)
+]/1.5, inf).asStream;
 ~percDurationSeq = Prand([0.5, Rest(0.5), Rest(0.5), Rest(0.5)], inf).asStream;
+// ~divSeq = Pseq([4, 2, 4, 2], inf).asStream;
+~divSeq = Pseq([1], inf).asStream;
+~durDiv = [4, 2, 4, 2];
 
 ~states = Pseq([\a, \b, \c, \d], inf).asStream;
 ~state = ~states.next;
-
-~divSeq = Pseq([4, 2, 4, 2], inf).asStream;
-~durDiv = [4, 2, 4, 2];
 
 ~modulateBipolar = { |seqValue, uiValue|
 	var output = 0.5;
@@ -305,12 +380,15 @@ x = Pdef(\plaitsSequence,
 					// "Completed 16 steps".postln;
 				};
 
+				~dur = ~setDuration.(~durationSeq.next, ~divSeq.next, ~speed);
+
 				~pitch ;
 			},
 			// \dur, 1,
 			// \dur, Prand([0.5, Rest(1.0), 0.5]/~durDiv, inf),
 			\dur, Pfunc { |event|
-				~setDuration.(~durationSeq.next, ~divSeq.next, ~speed)
+				// ~setDuration.(~durationSeq.next, ~divSeq.next, ~speed)
+				~dur
 			},
 			// \dur, Pseq([0.1, Rest(0.4), 0.2]/[0.5, 0.5, 1, 0.25], inf),
 			// \dur, Pseq([
@@ -350,7 +428,13 @@ x = Pdef(\plaitsSequence,
 			\morph, Pfunc { |event|
 				~modulateBipolar.(~morphSeq.next, ~morph)
 			},
-			\lpg_colour, Pseq([0.1, 0.2, 0.4, 1], inf),
+			\fm_mod, Pfunc { |event|
+				~modulateBipolar.(~fmModSeq.next, ~fmMod)
+			},
+			// \lpg_colour, Pseq([0.1, 0.2, 0.4, 1], inf),
+			\lpg_colour, Pfunc { |event|
+				~modulateBipolar.(~lpgColourSeq.next, ~lpgColour)
+			},
 			// \engine, Pseq([~e], inf),
 			\engine, Pfunc { |event|
 				~setEngine.(~engineSeq.next)
@@ -371,7 +455,7 @@ x = Pdef(\plaitsSequence,
 			// \atk, 0.1,
 			// \rel, 0.1,
 			// \amp, 0.2,
-			\mul, 0.5,
+			\mul, 0.0,
 			\out, Pseq(
 				[
 					0
@@ -391,12 +475,13 @@ x = Pdef(\plaitsSequence,
 			\instrument, \plaits,
 			// \dur, 0.5,
 			// \dur, Prand([0.5, Rest(0.5), Rest(0.5), Rest(0.5)]/~durDiv, inf),
-			// \dur, Pfunc { |event|
-			// 	~setDuration.(~percDurationSeq.next, ~divSeq.next, ~speed)
-			// },
 			\dur, Pfunc { |event|
-				~setDuration.(0.5, 1, ~speed)
+				// ~setDuration.(~percDurationSeq.next, ~divSeq.next, ~speed)
+				~dur
 			},
+			// \dur, Pfunc { |event|
+			// 	~setDuration.(0.5, 1, ~speed)
+			// },
 			// \dur, Pseq([
 			// 	Pseq([0.2, 0.4, Rest(0.8)]),
 			// 	0.2,
@@ -408,27 +493,74 @@ x = Pdef(\plaitsSequence,
 			// 	0.2,
 			// 	0.2
 			// ] / [0.5, 2, 2, 0.5, 2, 1], inf),
-			\pitch, 38,
-			\harm, 0.25,
-			\timbre, 0.7,
+			\pitch, 36,
+			\harm, 0.55,
+			\timbre, 0.8,
 			// \morph, 0.5,
 			\morph, Pseq(
-				[0.3, 0.1, 0.1, 0.1, 0.4, 0.1, 0.1, 0.1, Pseq([0.5, 0.3, 0.1])
-			] * 4, inf),
-			\engine, Pseq([13,13,13,13,13,13,13,13,14], inf),
-			// \engine, 14,
+				[0.4, 0.1, 0.2, 0.1, 0.4, 0.1, 0.1, 0.05, Pseq([0.5, 0.3, 0.1])
+			] * 0.5, inf),
+			// \engine, Pseq([13,13,13,13,13,13,13,13,14], inf),
+			\engine, Pseq([13,13,13,13, 13,13,13,13], inf),
+			// \engine, 0,
 			// \decay, 0.2,
-			\mul, 0.8,
+			\mul, 0.6,
 			\out, 0
 			// \out, Pseq([0,1,2,3,4,5], inf)
+		),
+		// hats / claps ////////////////////////////////////
+		Pbind(
+			\instrument, \plaits,
+			\dur, Pseq([
+				Prand([2, Rest(2)]),
+				2,
+				Rest(2),
+				Rest(2),
+			1]/3, inf),
+			\pitch, Pseq([45, 45, 45, 45, 30], inf),
+			\harm, Pseq([0.1, 0.6, 0.7, 0.8, 0.4], inf),
+			\timbre, Pseq([0.9, 0.6, 0.7, 0.8, 0.2], inf),
+			\morph, Pseq([0.1, 0.01, 0.1, 0.1, 0.15], inf),
+			\decay, 0.2, //only effects first sound!
+			\engine, Pseq([
+				Prand([9, 10, 15]), //9 is the accent
+				15, 15,
+				Prand([14, 15]),
+				14
+			], inf),
+			\mul, Pseq([1.05, 0.45, 0.45, 0.45, 1.2] -0.3, inf),
+			\out, 0
+		),
+		// More hats! /////////////////////////////////////////
+		Pbind(
+			\instrument, \plaits,
+			\dur, Pseq([
+				Rest(1),
+				Prand([Rest(1), 1, 1, 1]),
+				1
+			]/3.0, inf),
+			\pitch, Pseq([65, 45, 55, 45, 30], inf),
+			\harm, Pseq([0.1, 0.6, 0.7, 0.8, 0.4], inf),
+			\timbre, Pseq([0.9, 0.6, 0.7, 0.8, 0.2], inf),
+			\morph, Pseq([0.1, 0.01, 0.1, 0.1, 0.15] * 2, inf),
+			\decay, 0.05,
+			\engine, Pseq([
+				15
+			], inf),
+			\mul, Pseq([0.01], inf),
+
+			\out, 0
 		)
 	])
-).play;
+	).play(~tempoClock);
+// ).play();
+// )
 )
 
 // engine
 // chooses synthesis engine (0 -- 15): 0:virtual_analog_engine, 1:waveshaping_engine, 2:fm_engine, 3:grain_engine, 4:additive_engine, 5:wavetable_engine, 6:chord_engine, 7:speech_engine, 8:swarm_engine, 9:noise_engine, 10:particle_engine, 11:string_engine, 12:modal_engine, 13:bass_drum_engine, 14:snare_drum_engine, 15:hi_hat_engine
 
+x.play;
 x.stop;
 
 // Pseq([0.2, 0.5, 0.5]/2, inf)
