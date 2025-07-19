@@ -60,7 +60,7 @@
 	// var output = 11;
 	// get or in the case of an expression, interpret the engine index to use
 	// ensuring we wrap for negative values
-	var output = ~engines.wrapAt(seqExpr.interpret);
+	var output = ~engines.wrapAt(seqExpr.asString.interpret);
 
 	// ['~setEngine:', seqExpr, output].postln;
 
