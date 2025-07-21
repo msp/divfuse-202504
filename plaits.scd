@@ -42,7 +42,10 @@
 ~setDuration = { |seqValue, divSeqValue, uiValue|
 	var output = 1;
 	uiValue = uiValue.clip(0.8, 1.4);
-	output = seqValue /  divSeqValue / uiValue;
+	divSeqValue = divSeqValue.max(0.001);
+	uiValue = uiValue.max(0.001);
+	output = seqValue / divSeqValue / uiValue;
+	output = output.clip(0.001, 100);
 
 	// ['~setDuration:', uiValue.round(0.0001), output.round(0.0001)].postln;
 
@@ -172,7 +175,7 @@ OSCdef.new(
 		var value = msg[1];
 		msg.round(0.001).postln;
 		// ~speed = value;
-		~tempoClock.tempo = value/60;
+		~tempoClock.tempo = (value.max(0.1))/60;
 	}
 	, '/plaits1/speed'
 );
@@ -238,44 +241,45 @@ SynthDef(\plaits,
 
 		// var timb_mod = MouseY.kr(-1,1);
 
-		var l_timbre = timbre + LFTri.kr(freq: speed/100, mul: timb_mod);
-		var l_morph = morph + LFTri.kr(freq: speed/100, mul: morph_mod);
+		var l_timbre = (timbre + LFTri.kr(freq: speed/100, mul: timb_mod)).clip(0, 1);
+		var l_morph = (morph + LFTri.kr(freq: speed/100, mul: morph_mod)).clip(0, 1);
 
 		var sig = MiPlaits.ar(
-			pitch: pitch,
-			engine: engine,
-			harm: harm,
+			pitch: pitch.clip(0, 127),
+			engine: engine.clip(0, 15),
+			harm: harm.clip(0, 1),
 			timbre: l_timbre,
 			morph: l_morph,
 			trigger: gate,
 			// trigger: Impulse.kr(speed),
 			// level: level,
-			decay: decay,
-			fm_mod: fm_mod,
+			decay: decay.clip(0, 1),
+			fm_mod: fm_mod.clip(-1, 1),
 			// timb_mod: timb_mod,
 			// morph_mod: morph_mod,
-			lpg_colour: lpg_colour,
+			lpg_colour: lpg_colour.clip(0, 1),
 			mul: mul
 		);
 
 		var env = Linen.kr(gate, doneAction: Done.freeSelf);
 
-		Out.ar(out,
-			// sig * env
-			MiVerb.ar(
-				sig * env,
-				time: reverb_time,
-				drywet: drywet,
-				damp: 0.8,
-				hp: 0.7,
-				freeze: TRand.kr(-1, 1, Dust.kr(0.7)),
-				// freeze: 1,
-				diff: 0.625,
-				mul: 1.1,
-				add: 0.0
+		// Sanitize to kill denormals, infs, and NaNs - crucial for engine switching!
+		sig = sig.sanitize;
 
-			);
+		sig = MiVerb.ar(
+			(sig * env).tanh,
+			time: reverb_time.clip(0, 1),
+			drywet: drywet.clip(0, 1),
+			damp: 0.8,
+			hp: 0.7,
+			freeze: TRand.kr(-1, 1, Dust.kr(0.7)),
+			// freeze: 1,
+			diff: 0.625,
+			mul: 1.1,
+			add: 0.0
 		);
+
+		Out.ar(out, LeakDC.ar(sig.tanh));
 		// Out.ar(0, sig[0] ! 2);
 }).add;
 
@@ -515,4 +519,4 @@ Quarks.gui
 	// out[0] ! 2
 	Out.ar(0, out[0] ! 2);
 }.play
-// )
+)
