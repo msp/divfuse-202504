@@ -16,13 +16,13 @@
 			fm_mod: Pseq([0.5], inf).asStream,
 			lpg_colour: Pseq([0.1, 0.2, 0.4, 1], inf).asStream,
 			engine: Pseq([
-				"~plaits[0].engine",
+				"e",
 				Pwrand([2,11], [0.9, 0.1].normalizeSum),
-				"~plaits[0].engine",
-				"~plaits[0].engine", 
-				Pwrand(["~plaits[0].engine", 2], [0.8, 0.2].normalizeSum),
-				"~plaits[0].engine+2",
-				"~plaits[0].engine",
+				"e",
+				"e",
+				Pwrand(["e", 2], [0.8, 0.2].normalizeSum),
+				"e+2",
+				"e",
 				0,
 			], inf).asStream,
 			duration: (
@@ -94,13 +94,11 @@
 	// 	\d, { 0 },
 	// 	{ 0 }
 	// );
-	// var output = 11;
-	// get or in the case of an expression, interpret the engine index to use
-	// ensuring we wrap for negative values
-	var e = ~plaits[instanceIndex].engine;
-	var output = ~engines.wrapAt(seqExpr.asString.interpret);
+	// Replace "e" placeholder with actual current engine value in the expression
+	var expr = seqExpr.asString.replace("e", ~plaits[instanceIndex].engine.asString);
+	var output = ~engines.wrapAt(expr.interpret);
 
-	// ['~setEngine:', seqExpr, output].postln;
+	// ['~setEngine:', seqExpr, expr, output].postln;
 
 	output;
 };
